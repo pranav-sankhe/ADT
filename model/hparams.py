@@ -1,0 +1,7 @@
+n_filters = [32, 32, 64]
+Ksize = [3,3]
+stride = [1,1,1,1]
+poolTrue = [True, True]
+max_pool_ksize = [1, 2]
+max_pool_stride = [1, 2]
+fc_size = [512]

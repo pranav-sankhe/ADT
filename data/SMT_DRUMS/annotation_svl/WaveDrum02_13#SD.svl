@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sonic-visualiser>
+<sv>
+  <data>
+    <model id="2" name="" sampleRate="44100" start="0" end="342475" type="sparse" dimensions="1" resolution="1" notifyOnAdd="true" dataset="1" />
+    <dataset id="1" dimensions="1">
+      <point frame="30134" label="New Point" />
+      <point frame="71039" label="New Point" />
+      <point frame="112176" label="New Point" />
+      <point frame="192964" label="New Point" />
+      <point frame="233870" label="New Point" />
+      <point frame="275006" label="New Point" />
+      <point frame="355795" label="New Point" />
+      <point frame="396700" label="New Point" />
+      <point frame="437837" label="New Point" />
+      <point frame="518625" label="New Point" />
+      <point frame="559531" label="New Point" />
+    </dataset>
+  </data>
+  <display>
+    <layer id="0" type="timeinstants" name="Time Instants" model="2"  plotStyle="0" colourName="Purple" colour="#c832ff" darkBackground="false" />
+  </display>
+</sv>

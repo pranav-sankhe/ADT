@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sonic-visualiser>
+<sv>
+  <data>
+    <model id="2" name="" sampleRate="44100" start="0" end="342475" type="sparse" dimensions="1" resolution="1" notifyOnAdd="true" dataset="1" />
+    <dataset id="1" dimensions="1">
+      <point frame="221" label="New Point" />
+      <point frame="27975" label="New Point" />
+      <point frame="46684" label="New Point" />
+      <point frame="65582" label="New Point" />
+      <point frame="74998" label="New Point" />
+      <point frame="103579" label="New Point" />
+      <point frame="122478" label="New Point" />
+      <point frame="141190" label="New Point" />
+      <point frame="151280" label="New Point" />
+      <point frame="179176" label="New Point" />
+      <point frame="197885" label="New Point" />
+      <point frame="216781" label="New Point" />
+      <point frame="226198" label="New Point" />
+      <point frame="254779" label="New Point" />
+      <point frame="273679" label="New Point" />
+      <point frame="292390" label="New Point" />
+      <point frame="302479" label="New Point" />
+      <point frame="330375" label="New Point" />
+      <point frame="349084" label="New Point" />
+      <point frame="367982" label="New Point" />
+      <point frame="377398" label="New Point" />
+      <point frame="405979" label="New Point" />
+      <point frame="424878" label="New Point" />
+      <point frame="443589" label="New Point" />
+      <point frame="453679" label="New Point" />
+      <point frame="481576" label="New Point" />
+      <point frame="500285" label="New Point" />
+      <point frame="519181" label="New Point" />
+      <point frame="528598" label="New Point" />
+      <point frame="557179" label="New Point" />
+      <point frame="576079" label="New Point" />
+      <point frame="594790" label="New Point" />
+    </dataset>
+  </data>
+  <display>
+    <layer id="0" type="timeinstants" name="Time Instants" model="2"  plotStyle="0" colourName="Purple" colour="#c832ff" darkBackground="false" />
+  </display>
+</sv>

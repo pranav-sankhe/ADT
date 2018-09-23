@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sonic-visualiser>
+<sv>
+  <data>
+    <model id="2" name="" sampleRate="44100" start="0" end="342475" type="sparse" dimensions="1" resolution="1" notifyOnAdd="true" dataset="1" />
+    <dataset id="1" dimensions="1">
+      <point frame="16" label="New Point" />
+      <point frame="18918" label="New Point" />
+      <point frame="37425" label="New Point" />
+      <point frame="56522" label="New Point" />
+      <point frame="75226" label="New Point" />
+      <point frame="94125" label="New Point" />
+      <point frame="113026" label="New Point" />
+      <point frame="132122" label="New Point" />
+      <point frame="151217" label="New Point" />
+      <point frame="170120" label="New Point" />
+      <point frame="188625" label="New Point" />
+      <point frame="207722" label="New Point" />
+      <point frame="226425" label="New Point" />
+      <point frame="245326" label="New Point" />
+      <point frame="264225" label="New Point" />
+      <point frame="283322" label="New Point" />
+      <point frame="302418" label="New Point" />
+      <point frame="321319" label="New Point" />
+      <point frame="339826" label="New Point" />
+      <point frame="358923" label="New Point" />
+      <point frame="377626" label="New Point" />
+      <point frame="396525" label="New Point" />
+      <point frame="415426" label="New Point" />
+      <point frame="434522" label="New Point" />
+      <point frame="453617" label="New Point" />
+      <point frame="472519" label="New Point" />
+      <point frame="491025" label="New Point" />
+      <point frame="510122" label="New Point" />
+      <point frame="528825" label="New Point" />
+      <point frame="547726" label="New Point" />
+      <point frame="566625" label="New Point" />
+      <point frame="585723" label="New Point" />
+    </dataset>
+  </data>
+  <display>
+    <layer id="0" type="timeinstants" name="Time Instants" model="2"  plotStyle="0" colourName="Purple" colour="#c832ff" darkBackground="false" />
+  </display>
+</sv>
