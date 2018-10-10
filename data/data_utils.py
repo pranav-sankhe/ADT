@@ -11,5 +11,12 @@ def spectrogram(y, sr, N, n_fft, hop_length, win_length  ):
 	phase = np.angle(mag)
 	return mag
 
+def get_templates():
+	
+
+
+
+
+
 
 	
