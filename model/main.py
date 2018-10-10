@@ -1,48 +1,25 @@
-import tensorflow as tf
 import numpy as np 
-import pandas as pd
-import os
-from tensorflow.python.ops import embedding_ops
-import hparams
-import utils
-
-import tensorflow.contrib.slim as slim
-
-def conv_net(inputs):
-  """Builds the ConvNet from Kelz 2016."""
-    with slim.arg_scope(
-    [slim.conv2d, slim.fully_connected],
-    activation_fn=tf.nn.relu,
-    weights_initializer=tf.contrib.layers.variance_scaling_initializer(
-    factor=2.0, mode='FAN_AVG', uniform=True)):
-    
-        n_filters = hparams.n_filters
-        Ksize = hparams.Ksize
-        max_pool_ksize = hparams.max_pool_ksize
-        max_pool_stride = hparams.max_pool_stride
-        fc_size = hparams.fc_size
+import sys 
+sys.path.insert(0, '../data')
+import nimfa
 
 
-        net = slim.conv2d(inputs, n_filters[0], Ksize, scope='conv1', normalizer_fn=slim.batch_norm)
 
-        net = slim.conv2d(net, n_filters[1], Ksize, scope='conv2', normalizer_fn=slim.batch_norm)
-        net = slim.max_pool2d(net, max_pool_ksize, stride=max_pool_stride, scope='pool2')
-        net = slim.dropout(net, 0.25, scope='dropout2')
+V = np.random.rand(30, 20)
 
-        net = slim.conv2d(net, n_filters[2], Ksize, scope='conv3', normalizer_fn=slim.batch_norm)
-        net = slim.max_pool2d(net, max_pool_ksize, stride=max_pool_stride, scope='pool3')
-        net = slim.dropout(net, 0.25, scope='dropout3')
+init_W = np.random.rand(30, 4)
+init_H = np.random.rand(4, 20)
 
-        # Flatten while preserving batch and time dimensions.
-        dims = tf.shape(net)
-        net = tf.reshape(net, (dims[0], dims[1],
-                               net.shape[2].value * net.shape[3].value), 'flatten4')
+# Fixed initialization of latent matrices
+nmf = nimfa.Nmf(V, seed="fixed", W=init_W, H=init_H, rank=4)
+nmf_fit = nmf()
 
-        net = slim.fully_connected(net, fc_size[0], scope='fc5')
-        net = slim.dropout(net, 0.5, scope='dropout5')
+# print("Euclidean distance: %5.3f" % nmf_fit.distance(metric="euclidean"))
+# print('Initialization type: %s' % nmf_fit.seeding)
+# print('Iterations: %d' % nmf_fit.n_iter)
 
-    return net    
+W = nmf_fit.basis()
+print('Basis matrix:\n%s' % W)
 
-
-def acoustic_model():
-    """Acoustic model that handles all specs for a sequence in one window."""
+H = nmf.coef()
+print('Mixture matrix:\n%s' % H)
