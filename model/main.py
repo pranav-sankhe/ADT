@@ -1,6 +1,7 @@
 import numpy as np 
 import sys 
 sys.path.insert(0, '../data')
+import data_utils
 import nimfa
 
 
