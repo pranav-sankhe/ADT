@@ -1,7 +1,13 @@
-n_filters = [32, 32, 64]
-Ksize = [3,3]
-stride = [1,1,1,1]
-poolTrue = [True, True]
-max_pool_ksize = [1, 2]
-max_pool_stride = [1, 2]
-fc_size = [512]
+gen_type = ['RealDrum', 'TechnoDrum', 'WaveDrum']
+data_dir = '../data/SMT_DRUMS'
+num_drums = 3
+
+n_fft = 1024
+hop_length = 64
+win_length = 256
+window='hann'
+
+max_audio_length = 1323000
+
+get_template_length = 0.4
+test_filepath = '../data/test.wav'
