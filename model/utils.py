@@ -2,8 +2,13 @@ import numpy as np
 import sys 
 sys.path.insert(0, '../data')
 import data_utils
-import nimfa
+import librosa
+from sklearn.decomposition import NMF
 import hparams
+from scipy import sparse
+import matplotlib.pyplot as plt
+from scipy import signal
+from scipy.signal import find_peaks, find_peaks_cwt
 
 def get_templates():
     ## ['HH', 'KD', 'SD', 'MIX']
@@ -47,61 +52,180 @@ def get_templates():
 
 
     n_fft = hparams.n_fft
-    hop_length =  hparams.hop_length
     win_length = hparams.win_length
-    window = hparams.window
+    # window = hparams.window
     
     
     flag = 0
-    K, T = data_utils.get_spec_dims(hparams.test_filepath, n_fft, hop_length, win_length)
+    K, T = data_utils.get_spec_dims(hparams.test_filepath, n_fft, win_length)
 
-    prev_template = np.zeros((K, hparams.num_drums))
+    prev_template = np.random.rand(K, hparams.num_drums)
     sum_of_templates = []
+    avg_template = []
     for i in range(file_list_length):
-        V = data_utils.get_spectrogram(data_dir + '/audio/' + audio_file_list[i] + '.wav', n_fft, hop_length, win_length)
-        activations = data_utils.create_gt_activations( data_dir + '/annotation_xml/' + xml_file_list[i] + '.xml', n_fft, hop_length, win_length, T)
-        lsnmf = nimfa.Lsnmf(V, seed=None, H=activations)
-        lsnmf_fit = lsnmf()
-        template = lsnmf_fit.basis()
-        sum_of_templates = np.add(prev_template, template)
-        prev_templates = sum_of_templates
-    avg_template = np.divide(prev_templates, file_list_length)
+        print ("At file ", audio_file_list[i])
+        V, f, t = data_utils.get_spectrogram(data_dir + '/audio/' + audio_file_list[i] + '.wav', n_fft, win_length)
+        activations = data_utils.create_gt_activations(data_dir + '/annotation_xml/' + xml_file_list[i] + '.xml', win_length, T, t)
+    
+        if i ==0:
+            avg_template = prev_template
 
+        model = NMF(n_components=3, init='custom')
+        template = model.fit_transform(V, W = avg_template , H = activations)
+        # H = model.components_
+        if i > 0:
+            sum_of_templates = np.add(prev_template, template)
+            prev_templates = sum_of_templates
+            avg_template = np.divide(prev_templates, i)
+        
+    np.save('templates', avg_template)                
     return avg_template
 
         
 
 
 
-def nmf(V, init_W=None, init_H=None):
+def predict_activations(filename):
 
-    if init_W == None:
-        lsnmf = nimfa.Lsnmf(V, H=init_H, max_iter=10, rank=3)
-        lsnmf_fit = lsnmf()
-        H = lsnmf_fit.coef()
-        # print('Template:\n%s' % H)
+    gen_type = hparams.gen_type
+    drum_type_index = 3         # select 'MIX' 
+    data_dir = hparams.data_dir
 
-        # print('K-L divergence: %5.3f' % lsnmf_fit.distance(metric='kl'))
-        return H
+    n_fft = hparams.n_fft
+    win_length = hparams.win_length
+
+    K, T = data_utils.get_spec_dims(hparams.test_filepath, n_fft, win_length)
+    
+    filepath = data_dir + '/audio/' + filename + '.wav'
+    V, f, t = data_utils.get_spectrogram(filepath, n_fft, win_length)
+
+    templates = np.load('templates.npy')
+
+    model = NMF(n_components=3, init='custom')
+    model.fit_transform(V, W = templates , H = np.random.rand(hparams.num_drums, T))
+    H = model.components_
+
+    return H
+
+def eval(filename):
+    data_dir = hparams.data_dir
+    win_length = hparams.win_length
+    n_fft = hparams.n_fft
+    sample_rate = hparams.sample_rate
+
+    audio_filepath = data_dir + '/audio/' + filename + '.wav'
+    xml_filepath = data_dir + '/annotation_xml/' + filename + '.xml'
+    
+    K, T = data_utils.get_spec_dims(hparams.test_filepath, n_fft, win_length)
+    
+    drums, onset_times, offset_times = data_utils.read_xml_file(xml_filepath)
+    V, f, t = data_utils.get_spectrogram(audio_filepath, n_fft, win_length)
+
+    length = len(drums)
+    HH_gt_onset = []
+    KD_gt_onset = []
+    SD_gt_onset = []
+    for i in range(length):
+        if drums[i] == 'HH':
+            HH_gt_onset.append(onset_times[i])
+
+        if drums[i] == 'KD':
+            KD_gt_onset.append(onset_times[i])
+
+        if drums[i] == 'SD':
+            SD_gt_onset.append(onset_times[i])
+
+    for i in range(len(HH_gt_onset)):
+        HH_gt_onset[i] = data_utils.find_nearest(t, HH_gt_onset[i])
+
+    for i in range(len(KD_gt_onset)):
+        KD_gt_onset[i] = data_utils.find_nearest(t, KD_gt_onset[i])
+
+    for i in range(len(SD_gt_onset)):
+        SD_gt_onset[i] = data_utils.find_nearest(t, SD_gt_onset[i])
+
+
+    pred_activations = predict_activations(filename)
+    HH_pred = pred_activations[0,:]
+    KD_pred = pred_activations[1,:]
+    SD_pred = pred_activations[2,:]
+
+    HH_peaks, _ = find_peaks(HH_pred, width=1.3, prominence=3.2) 
+    KD_peaks, _ = find_peaks(KD_pred, width=1.3, prominence=3.2) 
+    SD_peaks, _ = find_peaks(SD_pred, width=1.3, prominence=3.2) 
+
+    # HH_peaks = np.divide(HH_peaks, sample_rate)
+    # SD_peaks = np.divide(SD_peaks, sample_rate)
+    # KD_peaks = np.divide(KD_peaks, sample_rate)
+    plt.figure(); plt.plot(HH_peaks, HH_pred[HH_peaks], "ob"); plt.plot(HH_pred); plt.legend(['HH'])
+    plt.figure(); plt.plot(KD_peaks, KD_pred[KD_peaks], "ob"); plt.plot(KD_pred); plt.legend(['KD'])
+    plt.figure(); plt.plot(SD_peaks, SD_pred[SD_peaks], "ob"); plt.plot(SD_pred); plt.legend(['SD'])    
+    plt.show()
+
+    pred_time_HH = t[HH_peaks]
+    pred_time_KD = t[KD_peaks]
+    pred_time_SD = t[SD_peaks]
+    
+    # import pdb; pdb.set_trace()
+    # f_measure = mir_eval.beat.f_measure(gt_activations, estimated_beats)
 
 
 
-    # init_W = np.random.rand(30, 4)
-    # init_H = np.random.rand(4, 20)
 
-    # # Fixed initialization of latent matrices
-    # nmf = nimfa.Nmf(V, seed="fixed", W=init_W, H=init_H, rank=4)
-    # nmf_fit = nmf()
+    # plt.subplot(3, 1, 1)
+    # HH_peaks, _ = find_peaks(HH_pred, width=1.2, prominence=2.7) 
+    # plt.plot(HH_peaks, HH_pred[HH_peaks], "ob"); plt.plot(HH_pred)
+    # plt.subplot(3, 1, 2)
+    # KD_peaks, _ = find_peaks(KD_pred, width=1.2, prominence=2.7) 
+    # plt.plot(KD_peaks, KD_pred[KD_peaks], "ob"); plt.plot(KD_pred)
+    # plt.subplot(3, 1, 3)
+    # SD_peaks, _ = find_peaks(SD_pred, width=1.2, prominence=2.7) 
+    # plt.plot(SD_peaks, SD_pred[SD_peaks], "ob"); plt.plot(SD_pred)
+    # plt.show()
 
-    # # print("Euclidean distance: %5.3f" % nmf_fit.distance(metric="euclidean"))
-    # # print('Initialization type: %s' % nmf_fit.seeding)
-    # # print('Iterations: %d' % nmf_fit.n_iter)
+    
+    # return f_measure
 
-    # W = nmf_fit.basis()
-    # print('Basis matrix:\n%s' % W)
+def tweak_eval_params(filename):
+    data_dir = hparams.data_dir
+    win_length = hparams.win_length
+    n_fft = hparams.n_fft
+    sample_rate = hparams.sample_rate
 
-    # H = nmf.coef()
-    # print('Mixture matrix:\n%s' % H)  
+    audio_filepath = data_dir + '/audio/' + filename + '.wav'
+    xml_filepath = data_dir + '/annotation_xml/' + filename + '.xml'
+    
+    K, T = data_utils.get_spec_dims(hparams.test_filepath, n_fft, win_length)
+    # V, f, t = data_utils.get_spectrogram(data_dir + '/audio/' + audio_file_list[i] + '.wav', n_fft, win_length)
+    gt_activations =  data_utils.read_xml_file(xml_filepath)
+    
 
-get_templates()
+    pred_activations = predict_activations(filename)
+    HH_pred = pred_activations[0,:]
+    KD_pred = pred_activations[1,:]
+    SD_pred = pred_activations[2,:]
 
+
+    peaks, _ = find_peaks(HH_pred, distance=20)
+    peaks2, _ = find_peaks(HH_pred, width=1.2, prominence=2.7)      # BEST!
+    peaks3, _ = find_peaks(HH_pred, width=20)
+    peaks4, _ = find_peaks(HH_pred, threshold=0.4)     # Required vertical distance to its direct neighbouring samples, pretty useless
+    
+    plt.subplot(2, 2, 1)
+    plt.plot(peaks, HH_pred[peaks], "xr"); plt.plot(HH_pred); plt.legend(['distance'])
+    plt.subplot(2, 2, 2)
+    plt.plot(peaks2, HH_pred[peaks2], "ob"); plt.plot(HH_pred); plt.legend(['prominence'])
+    plt.subplot(2, 2, 3)
+    plt.plot(peaks3, HH_pred[peaks3], "vg"); plt.plot(HH_pred); plt.legend(['width'])
+    plt.subplot(2, 2, 4)
+    plt.plot(peaks4, HH_pred[peaks4], "xk"); plt.plot(HH_pred); plt.legend(['threshold'])
+    plt.show()
+
+    # for i in range(len(HH_gt_onset)):
+    #     HH_gt_onset[i] = find_nearest(t, HH_gt_onset[i])
+
+    # for i in range(len(KD_gt_onset)):
+    #     KD_gt_onset[i] = find_nearest(t, KD_gt_onset[i])
+
+    # for i in range(len(SD_gt_onset)):
+    #     SD_gt_onset[i] = find_nearest(t, SD_gt_onset[i])

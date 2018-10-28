@@ -7,37 +7,85 @@ import os
 import data_params
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
+import librosa.display
+from scipy.io import wavfile as wav
+
+def spectrogram(y, hop_length, sr, plotFlag,flag_hp,save_flag):
+
+    # write('../test_audio/fut.wav', sr, y)      #write file under test
+    if flag_hp:
+        y_harm, y_perc = librosa.effects.hpss(y)
+        # write('../test_audio/fut__hamonic_comp.wav', sr, y_harm)
+        # write('../test_audio/fut_percussive_comp.wav', sr, y_perc)
+
+        D_harm = librosa.stft(y_harm, hop_length=hop_length)
+        D_perc = librosa.stft(y_perc, hop_length=hop_length)
+
+    
+        plt.subplot(211)    
+        librosa.display.specshow(librosa.amplitude_to_db(D_harm,
+                                                       ref=np.max),
+                               y_axis='log', x_axis='time')
+        plt.title('Harmonic')    
+        #plt.title('Turkish March:Power spectrogram of harmonic component: First ' + str(len(y)) + ' iterations' + ' with hopsize = ' + str(hop_length))
+        plt.colorbar(format='%+2.0f dB')
+        plt.tight_layout()            
+
+        plt.subplot(212)
+        librosa.display.specshow(librosa.amplitude_to_db(D_perc,
+                                                       ref=np.max),
+                               y_axis='log', x_axis='time')
+        plt.title('Percussion')
+        #plt.title('Turkish March:Power spectrogram of percussive component: First ' + str(len(y)) + ' iterations' + ' with hopsize = ' + str(hop_length))
+        plt.colorbar(format='%+2.0f dB')
+        plt.tight_layout()
+        # if save_flag:
+        #     pylab.savefig('../results/' + filename + '_' + str(len(y)) + 'i_' + 'harm_perc_spectogram.png')
+        if plotFlag:
+            plt.show()
+
+    else:        
+        D = librosa.stft(y, hop_length=hop_length)
+        #D_left = librosa.stft(y, center=False)
+
+        #D_short = librosa.stft(y, hop_length=64)
+
+        librosa.display.specshow(librosa.amplitude_to_db(D,ref=np.max),y_axis='log', x_axis='time')
+        plt.title(filename + ':Power spectrogram: First ' + str(len(y)) + ' iterations' + ' with hopsize = ' + str(hop_length))
+        plt.colorbar(format='%+2.0f dB')
+        if save_flag:
+            pylab.savefig('../results/' + filename + '_' + str(len(y)) + 'i_' + 'spectogram.png')
+        plt.tight_layout()
+        if plotFlag:             
+            plt.show()
 
 
-def get_spectrogram(filepath, n_fft, hop_length, win_length):
-    y = librosa.load(filepath, sr=None)[0]
+def get_spectrogram(filepath, n_fft, win_length):
+
+    #sr, y = wav.read(filepath)
+    y, sr = librosa.load(filepath, sr=44100) 
+    #sr, y = wav.read(filepath)
+
     y = np.pad(y, (0, data_params.max_audio_length - len(y)), 'constant', constant_values=(0))
-    spec = librosa.stft(y, n_fft, hop_length, win_length, window='hann', center=True, pad_mode='reflect')
-    import pdb; pdb.set_trace()
-    # spec = signal.stft
+    f, t, spec = signal.stft(y, sr, nperseg=win_length,nfft=n_fft)
+    # plt.pcolormesh(t, f, np.abs(spec), vmin=0, vmax=2*np.sqrt(2)*np.abs(spec)[0][0])
+    # plt.title('STFT Magnitude')
+    # plt.ylabel('Frequency [Hz]')
+    # plt.xlabel('Time [sec]')
+    # plt.show()
     mag = np.abs(spec)
     phase = np.angle(mag)
-    return mag
+    return mag, f, t
 
-def get_spec_dims(test_filepath, n_fft, hop_length, win_length):
+def get_spec_dims(test_filepath, n_fft, win_length):
     
-    y = librosa.load(test_filepath, sr=None)[0]
+    #sr, y = wav.read(test_filepath)
+    y, sr = librosa.load(test_filepath, sr=None) 
     y = np.pad(y, (0, data_params.max_audio_length - len(y)), 'constant', constant_values=(0))
-    spec = librosa.stft(y, n_fft, hop_length, win_length, window='hann', center=True, pad_mode='reflect')
+    f, t, spec = signal.stft(y, sr, nperseg=win_length,nfft=n_fft)
     mag = np.abs(spec)
     phase = np.angle(mag)
     return mag.shape[0], mag.shape[1]
-
-def get_max_audio_length():
-
-    data_dir = 'SMT_DRUMS'
-    drum_type_index = 3
-    gen_type_index = 'all'
-    audio_file_list = get_audio_files(data_dir, drum_type_index, gen_type_index)
-    audio_file_list = [ data_dir + '/audio/'  + x for x in audio_file_list ]
-    audio_length_list = [ len(librosa.load(filepath, sr=None)[0]) for filepath in audio_file_list ]
-    return max(audio_length_list)
-
 
 def pre_emphasis(input_signal):
     '''
@@ -130,7 +178,13 @@ def read_xml_file(filepath):
     
     return drums, onset_times, offset_times
 
-def create_gt_activations(filepath, n_fft, hop_length, win_length, T):
+def find_nearest(a, a0):
+    "Element in nd array `a` closest to the scalar value `a0`"
+    idx = np.abs(a - a0).argmin()
+    return a.flat[idx]
+
+
+def create_gt_activations(filepath, win_length, T, t):
     drums, onset_times, offset_times = read_xml_file(filepath)
     sample_rate = data_params.sample_rate
     length = len(drums)
@@ -146,17 +200,25 @@ def create_gt_activations(filepath, n_fft, hop_length, win_length, T):
 
         if drums[i] == 'SD':
             SD_gt_onset.append(onset_times[i])
-    HH_gt_onset = np.multiply(HH_gt_onset, sample_rate)
-    KD_gt_onset = np.multiply(KD_gt_onset, sample_rate)
-    SD_gt_onset = np.multiply(SD_gt_onset, sample_rate)
+
+    for i in range(len(HH_gt_onset)):
+        HH_gt_onset[i] = find_nearest(t, HH_gt_onset[i])
+
+    for i in range(len(KD_gt_onset)):
+        KD_gt_onset[i] = find_nearest(t, KD_gt_onset[i])
+
+    for i in range(len(SD_gt_onset)):
+        SD_gt_onset[i] = find_nearest(t, SD_gt_onset[i])
+
     activation = np.zeros((data_params.num_drums, T))
-    import pdb; pdb.set_trace()
+    
     for i in HH_gt_onset:
         activation[0][int(i)] = 1
     for i in KD_gt_onset:
         activation[1][int(i)] = 1
     for i in SD_gt_onset:
         activation[2][int(i)] = 1        
+    
     return activation
             
 def get_audio_files(data_dir, drum_type_index, gen_type_index):
@@ -350,3 +412,28 @@ def extractSvlAnnotRegionFile(filename):
 
 
 
+def spectrogram_params():
+    filepath = data_params.test_filepath
+
+    n_fft = data_params.n_fft
+    win_length = data_params.win_length
+    
+    y, sr = librosa.load(filepath, sr=44100) 
+    
+    y = np.pad(y, (0, data_params.max_audio_length - len(y)), 'constant', constant_values=(0))
+    overlap = (3*win_length)/4
+    f, t, spec = signal.stft(y, sr, nfft=n_fft)
+    plt.pcolormesh(t, f, np.abs(spec), vmin=0, vmax=2*np.sqrt(2)*np.abs(spec)[0][0])
+    plt.title('STFT Magnitude')
+    plt.ylabel('Frequency [Hz]')
+    plt.xlabel('Time [sec]')
+    plt.show()
+    mag = np.abs(spec)
+    phase = np.angle(mag)
+    return mag, f, t
+
+    
+filepath = data_params.test_filepath
+y, sr = librosa.load(filepath, sr=data_params.sample_rate)    
+hop_length = 256
+spectrogram(y, hop_length, sr, plotFlag=True,flag_hp=False,save_flag=False)
