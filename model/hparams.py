@@ -1,10 +1,10 @@
 gen_type = ['RealDrum', 'TechnoDrum', 'WaveDrum']
-data_dir = '/Users/sabsathai/Documents/projects/drum_transcription/data/SMT_DRUMS'
+data_dir = '../data/SMT_DRUMS'
 num_drums = 3
 
 n_fft = 4096
-hop_length = 64
-win_length = 256
+win_length = 2048
+hop_length = 3*win_length/4
 window='hann'
 sample_rate = 44100
 

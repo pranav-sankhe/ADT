@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import librosa
 from scipy import signal
-import tensorflow as tf 
+# import tensorflow as tf 
 import os
 import data_params
 import xml.etree.ElementTree as ET
@@ -10,16 +10,14 @@ from xml.dom import minidom
 import librosa.display
 from scipy.io import wavfile as wav
 
-def spectrogram(y, hop_length, sr, plotFlag,flag_hp,save_flag):
+def spectrogram(y, n_fft, hop_length, win_length, window='hann', plotFlag=True,flag_hp=False,save_flag=False):
 
     # write('../test_audio/fut.wav', sr, y)      #write file under test
     if flag_hp:
         y_harm, y_perc = librosa.effects.hpss(y)
-        # write('../test_audio/fut__hamonic_comp.wav', sr, y_harm)
-        # write('../test_audio/fut_percussive_comp.wav', sr, y_perc)
 
-        D_harm = librosa.stft(y_harm, hop_length=hop_length)
-        D_perc = librosa.stft(y_perc, hop_length=hop_length)
+        D_harm = librosa.stft(y_harm, n_fft, hop_length, win_length, window='hann')
+        D_perc = librosa.stft(y_perc, n_fft, hop_length, win_length, window='hann')
 
     
         plt.subplot(211)    
@@ -27,7 +25,7 @@ def spectrogram(y, hop_length, sr, plotFlag,flag_hp,save_flag):
                                                        ref=np.max),
                                y_axis='log', x_axis='time')
         plt.title('Harmonic')    
-        #plt.title('Turkish March:Power spectrogram of harmonic component: First ' + str(len(y)) + ' iterations' + ' with hopsize = ' + str(hop_length))
+        
         plt.colorbar(format='%+2.0f dB')
         plt.tight_layout()            
 
@@ -36,25 +34,19 @@ def spectrogram(y, hop_length, sr, plotFlag,flag_hp,save_flag):
                                                        ref=np.max),
                                y_axis='log', x_axis='time')
         plt.title('Percussion')
-        #plt.title('Turkish March:Power spectrogram of percussive component: First ' + str(len(y)) + ' iterations' + ' with hopsize = ' + str(hop_length))
+        
         plt.colorbar(format='%+2.0f dB')
         plt.tight_layout()
-        # if save_flag:
-        #     pylab.savefig('../results/' + filename + '_' + str(len(y)) + 'i_' + 'harm_perc_spectogram.png')
         if plotFlag:
             plt.show()
-
+        return D_perc        
     else:        
-        D = librosa.stft(y, hop_length=hop_length)
-        #D_left = librosa.stft(y, center=False)
-
-        #D_short = librosa.stft(y, hop_length=64)
-
+        D = librosa.stft(y, n_fft, hop_length, win_length, window='hann')
         librosa.display.specshow(librosa.amplitude_to_db(D,ref=np.max),y_axis='log', x_axis='time')
-        plt.title(filename + ':Power spectrogram: First ' + str(len(y)) + ' iterations' + ' with hopsize = ' + str(hop_length))
+        plt.title(':Power spectrogram: First ' + str(len(y)) + ' iterations' + ' with hopsize = ' + str(hop_length))
         plt.colorbar(format='%+2.0f dB')
         if save_flag:
-            pylab.savefig('../results/' + filename + '_' + str(len(y)) + 'i_' + 'spectogram.png')
+            pylab.savefig('../results/' + str(len(y)) + 'i_' + 'spectogram.png')
         plt.tight_layout()
         if plotFlag:             
             plt.show()
@@ -162,21 +154,6 @@ def filter_banks(frames, sample_rate):
 
     return filter_banks
     
-def read_xml_file(filepath):
-    onset_times = []
-    offset_times = []
-    drums = []
-    tree = ET.parse(filepath)
-    root = tree.getroot()
-
-    for onset_time in root.iter('onsetSec'):
-        onset_times.append(float(onset_time.text))
-    for offset_time in root.iter('offsetSec'):
-        offset_times.append(float(offset_time.text))
-    for drum in root.iter('instrument'):
-        drums.append(drum.text)
-    
-    return drums, onset_times, offset_times
 
 def find_nearest(a, a0):
     "Element in nd array `a` closest to the scalar value `a0`"
@@ -184,42 +161,49 @@ def find_nearest(a, a0):
     return a.flat[idx]
 
 
-def create_gt_activations(filepath, win_length, T, t):
-    drums, onset_times, offset_times = read_xml_file(filepath)
+def create_gt_activations_xml(xml_filepath, audio_filepath):
+    drums, onset_times, offset_times = read_xml_file(xml_filepath)
     sample_rate = data_params.sample_rate
-    length = len(drums)
+    num_drums = len(drums)
     HH_gt_onset = []
     KD_gt_onset = []
     SD_gt_onset = []
-    for i in range(length):
+    for i in range(num_drums):
         if drums[i] == 'HH':
-            HH_gt_onset.append(onset_times[i])
+            HH_gt_onset.append(onset_times[i]*sample_rate)
 
         if drums[i] == 'KD':
-            KD_gt_onset.append(onset_times[i])
+            KD_gt_onset.append(onset_times[i]*sample_rate)
 
         if drums[i] == 'SD':
-            SD_gt_onset.append(onset_times[i])
+            SD_gt_onset.append(onset_times[i]*sample_rate)
 
-    for i in range(len(HH_gt_onset)):
-        HH_gt_onset[i] = find_nearest(t, HH_gt_onset[i])
-
-    for i in range(len(KD_gt_onset)):
-        KD_gt_onset[i] = find_nearest(t, KD_gt_onset[i])
-
-    for i in range(len(SD_gt_onset)):
-        SD_gt_onset[i] = find_nearest(t, SD_gt_onset[i])
-
-    activation = np.zeros((data_params.num_drums, T))
-    
+    y, sr = librosa.load(audio_filepath, sr=data_params.sample_rate)        
+    T = len(y)
+    activation_HH = np.zeros(T)
+    activation_SD = np.zeros(T)
+    activation_KD = np.zeros(T)
+        
     for i in HH_gt_onset:
-        activation[0][int(i)] = 1
+        activation_HH[int(i)] = 1
     for i in KD_gt_onset:
-        activation[1][int(i)] = 1
+        activation_KD[int(i)] = 1
     for i in SD_gt_onset:
-        activation[2][int(i)] = 1        
+        activation_SD[int(i)] = 1        
     
+    return activation_HH, activation_KD, activation_SD
+
+def create_gt_activations_svl(svl_filepath, audio_filepath):
+    sample_rate = data_params.sample_rate
+    frames = extractSvlAnnotRegionFile(svl_filepath)    
+    y, sr = librosa.load(audio_filepath, sr=data_params.sample_rate)        
+    T = len(y)
+    activation = np.zeros(T)
+    for i in frames:
+        activation[int(i)] = 1
+
     return activation
+
             
 def get_audio_files(data_dir, drum_type_index, gen_type_index):
         
@@ -304,6 +288,24 @@ def get_xml_files(data_dir, drum_type_index, gen_type_index):
 
 # readSVLfiles.py
 
+
+def read_xml_file(filepath):
+    onset_times = []
+    offset_times = []
+    drums = []
+    tree = ET.parse(filepath)
+    root = tree.getroot()
+
+    for onset_time in root.iter('onsetSec'):
+        onset_times.append(float(onset_time.text))
+    for offset_time in root.iter('offsetSec'):
+        offset_times.append(float(offset_time.text))
+    for drum in root.iter('instrument'):
+        drums.append(drum.text)
+    
+    return drums, onset_times, offset_times
+
+
 def get_svl_files(data_dir, drum_type_index, gen_type_index):
     
     audio_dir = data_dir + '/annotation_svl'
@@ -378,8 +380,8 @@ def extractSvlAnnotRegionFile(filename):
     ##    note that you could also keep any other
     ##    field here. 
     dataXML = dom.getElementsByTagName('model')
-    sample_rate = dataXML[0].attributes.keys()[6]
-    sample_rate = np.int(dataXML[0].getAttribute(sample_rate))    
+    # sample_rate = dataXML[0].attributes.keys()[6]
+    # sample_rate = np.int(dataXML[0].getAttribute(sample_rate))    
     
     ## XML structure with all the points from datasetXML:
     pointsXML = dom.getElementsByTagName('point')
@@ -400,7 +402,7 @@ def extractSvlAnnotRegionFile(filename):
     ## Iteration over the points:
     for node in range(nbPoints):
         ## converting sample to seconds for the time stamps and the durations:
-        frames[node] = np.int(pointsXML[node].getAttribute('frame')) / np.double(sample_rate)
+        frames[node] = np.int(pointsXML[node].getAttribute('frame'))
         # durations[node] = np.int(pointsXML[node].getAttribute('duration')) / np.double(sample_rate)
         ## copy-paste for the values and the labels:
         # values[node] = pointsXML[node].getAttribute('value')
@@ -433,7 +435,3 @@ def spectrogram_params():
     return mag, f, t
 
     
-filepath = data_params.test_filepath
-y, sr = librosa.load(filepath, sr=data_params.sample_rate)    
-hop_length = 256
-spectrogram(y, hop_length, sr, plotFlag=True,flag_hp=False,save_flag=False)

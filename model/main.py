@@ -21,7 +21,7 @@ xml_file_list = data_utils.get_xml_files(data_dir, drum_type_index, "all")
 xml_file_list = [x.split('.')[0] for x in xml_file_list]
 xml_file_list = np.intersect1d(xml_file_list, audio_file_list)
 
-
+utils.get_templates()
 # pred_activations = utils.predict_activations(filename)
 # plt.subplot(311)
 # plt.plot(pred_activations[0,:])
@@ -29,8 +29,8 @@ xml_file_list = np.intersect1d(xml_file_list, audio_file_list)
 # plt.plot(pred_activations[1,:])
 # plt.subplot(313)
 # plt.plot(pred_activations[2,:])
-filename = audio_file_list[0]
-utils.eval(filename)
+# filename = audio_file_list[0]
+# utils.eval(filename)
 
 # templates = np.load('templates.npy')
 # HH_templates = templates[:,0]

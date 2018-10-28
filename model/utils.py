@@ -10,9 +10,39 @@ import matplotlib.pyplot as plt
 from scipy import signal
 from scipy.signal import find_peaks, find_peaks_cwt
 
+
+
+def concatenate_audio(audio_file_list):
+    complete_list = []
+    data_dir = hparams.data_dir
+    for audio_filename in audio_file_list:
+        audio_filepath = data_dir + '/audio/' + audio_filename + '.wav'
+        y, sr = librosa.load(audio_filepath, sr=hparams.sample_rate)
+        y = list(y)
+        complete_list = complete_list + y
+    return complete_list
+
+
+def concatenate_xml(xml_file_list, audio_file_list):
+    complete_list = []
+    HH = []
+    KD = []
+    SD = []
+    data_dir = hparams.data_dir
+    for audio_filename, xml_filename in zip(audio_file_list, xml_file_list):
+        xml_filepath = data_dir + '/annotation_xml/' + xml_filename + '.xml'
+        audio_filepath = data_dir + '/audio/' + audio_filename + '.wav'
+        activation_HH, activation_KD, activation_SD = data_utils.create_gt_activations_xml(xml_filepath, audio_filepath)
+        activation_HH = list(activation_HH)
+        activation_SD = list(activation_SD)
+        activation_KD = list(activation_KD)
+        HH = HH + activation_HH
+        KD = KD + activation_KD
+        SD = SD + activation_SD
+
+    return HH, KD, SD
+
 def get_templates():
-    ## ['HH', 'KD', 'SD', 'MIX']
-    ## HH
     gen_type = hparams.gen_type
     drum_type_index = 3         # select 'MIX' 
     data_dir = hparams.data_dir
@@ -32,51 +62,21 @@ def get_templates():
     xml_file_list = np.intersect1d(xml_file_list, audio_file_list)
 
     audio_file_names = [x.split('#')[0] for x in audio_file_list]
-    svl_file_list    = data_utils.get_svl_files(data_dir, 'all', "all")
-    svl_file_list = [x.split('.')[0] for x in svl_file_list]
 
-    # prepare a 3*104 size matrix of file names.  [HH, KD, SD] * [# of recordings] 
-    
-    svl_files = np.zeros(( file_list_length, 3 ))
-    svl_files = svl_files.astype(str)
-    for i in range(len(svl_file_list)):
-        for l in range(file_list_length):
-            
-            if svl_file_list[i].find(audio_file_names[l]) != -1:
-                if svl_file_list[i].find('HH') != -1:
-                    svl_files[l][0] = svl_file_list[i]
-                if svl_file_list[i].find('KD') != -1:
-                    svl_files[l][1] = svl_file_list[i]
-                if svl_file_list[i].find('SD') != -1:
-                    svl_files[l][2] = svl_file_list[i]
-
-
+    y = concatenate_audio(audio_file_list)
+    HH, KD, SD = concatenate_xml(xml_file_list, audio_file_list)
+    activations = np.zeros((hparams.num_drums, len(y)))
+    activations[0, :] = HH
+    activations[1, :] = KD
+    activations[2, :] = SD
     n_fft = hparams.n_fft
     win_length = hparams.win_length
-    # window = hparams.window
+    hop_length = hparams.hop_length
+    import pdb; pdb.set_trace()
+    V = data_utils.spectrogram(y, n_fft, hop_length, win_length, window='hann', plotFlag=True,flag_hp=False,save_flag=False)
     
-    
-    flag = 0
-    K, T = data_utils.get_spec_dims(hparams.test_filepath, n_fft, win_length)
-
-    prev_template = np.random.rand(K, hparams.num_drums)
-    sum_of_templates = []
-    avg_template = []
-    for i in range(file_list_length):
-        print ("At file ", audio_file_list[i])
-        V, f, t = data_utils.get_spectrogram(data_dir + '/audio/' + audio_file_list[i] + '.wav', n_fft, win_length)
-        activations = data_utils.create_gt_activations(data_dir + '/annotation_xml/' + xml_file_list[i] + '.xml', win_length, T, t)
-    
-        if i ==0:
-            avg_template = prev_template
-
-        model = NMF(n_components=3, init='custom')
-        template = model.fit_transform(V, W = avg_template , H = activations)
-        # H = model.components_
-        if i > 0:
-            sum_of_templates = np.add(prev_template, template)
-            prev_templates = sum_of_templates
-            avg_template = np.divide(prev_templates, i)
+    model = NMF(n_components=3, init='custom')
+    template = model.fit_transform(V, W = avg_template , H = activations)
         
     np.save('templates', avg_template)                
     return avg_template

@@ -1,4 +1,4 @@
-data_dir = '/Users/sabsathai/Documents/projects/drum_transcription/data/SMT_DRUMS'
+data_dir = '/SMT_DRUMS'
 num_drums = 3
 drums = ['HH', 'KD', 'SD', 'MIX']
 num_gen_type = 3
@@ -9,8 +9,8 @@ sample_rate = 44100
 
 n_fft = 4096
 hop_length = 64
-win_length = 256
+win_length = 2048
 window='hann'
 
 
-test_filepath = '/Users/sabsathai/Documents/projects/drum_transcription/data/test.wav'
+test_filepath = 'test.wav'
