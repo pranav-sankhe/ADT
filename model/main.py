@@ -1,25 +1,11 @@
 import numpy as np 
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import sys 
 sys.path.insert(0, '../data')
 import data_utils
 import hparams
 import utils
 
-gen_type = hparams.gen_type
-drum_type_index = 3         # select 'MIX' 
-data_dir = hparams.data_dir
-
-audio_file_list = data_utils.get_audio_files(data_dir, drum_type_index, "all")
-
-audio_file_list = [x.split('.')[0] for x in audio_file_list]
-
-audio_file_list = audio_file_list[0:int(hparams.get_template_length*len(audio_file_list))]
-file_list_length = len(audio_file_list)
-
-xml_file_list = data_utils.get_xml_files(data_dir, drum_type_index, "all")
-xml_file_list = [x.split('.')[0] for x in xml_file_list]
-xml_file_list = np.intersect1d(xml_file_list, audio_file_list)
 
 utils.get_templates()
 # pred_activations = utils.predict_activations(filename)

@@ -1,5 +1,5 @@
 import numpy as np 
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import librosa
 from scipy import signal
 # import tensorflow as tf 
@@ -20,36 +20,36 @@ def spectrogram(y, n_fft, hop_length, win_length, window='hann', plotFlag=True,f
         D_perc = librosa.stft(y_perc, n_fft, hop_length, win_length, window='hann')
 
     
-        plt.subplot(211)    
-        librosa.display.specshow(librosa.amplitude_to_db(D_harm,
-                                                       ref=np.max),
-                               y_axis='log', x_axis='time')
-        plt.title('Harmonic')    
+        # plt.subplot(211)    
+        # librosa.display.specshow(librosa.amplitude_to_db(D_harm,
+                               #                         ref=np.max),
+                               # y_axis='log', x_axis='time')
+        # plt.title('Harmonic')    
         
-        plt.colorbar(format='%+2.0f dB')
-        plt.tight_layout()            
+        # plt.colorbar(format='%+2.0f dB')
+        # plt.tight_layout()            
 
-        plt.subplot(212)
-        librosa.display.specshow(librosa.amplitude_to_db(D_perc,
-                                                       ref=np.max),
-                               y_axis='log', x_axis='time')
-        plt.title('Percussion')
+        # plt.subplot(212)
+        # librosa.display.specshow(librosa.amplitude_to_db(D_perc,
+        #                                                ref=np.max),
+        #                        y_axis='log', x_axis='time')
+        # plt.title('Percussion')
         
-        plt.colorbar(format='%+2.0f dB')
-        plt.tight_layout()
-        if plotFlag:
-            plt.show()
+        # plt.colorbar(format='%+2.0f dB')
+        # plt.tight_layout()
+        # if plotFlag:
+        #     plt.show()
         return D_perc        
     else:        
         D = librosa.stft(y, n_fft, hop_length, win_length, window='hann')
         librosa.display.specshow(librosa.amplitude_to_db(D,ref=np.max),y_axis='log', x_axis='time')
-        plt.title(':Power spectrogram: First ' + str(len(y)) + ' iterations' + ' with hopsize = ' + str(hop_length))
-        plt.colorbar(format='%+2.0f dB')
-        if save_flag:
-            pylab.savefig('../results/' + str(len(y)) + 'i_' + 'spectogram.png')
-        plt.tight_layout()
-        if plotFlag:             
-            plt.show()
+        # plt.title(':Power spectrogram: First ' + str(len(y)) + ' iterations' + ' with hopsize = ' + str(hop_length))
+        # plt.colorbar(format='%+2.0f dB')
+        # if save_flag:
+        #     pylab.savefig('../results/' + str(len(y)) + 'i_' + 'spectogram.png')
+        # plt.tight_layout()
+        # if plotFlag:             
+        #     plt.show()
 
 
 def get_spectrogram(filepath, n_fft, win_length):
@@ -224,6 +224,7 @@ def get_audio_files(data_dir, drum_type_index, gen_type_index):
     complete_file_list = os.listdir(audio_dir)            
     length = len(complete_file_list)
     list_drum_type = []
+    import pdb; pdb.set_trace()
     if drum_type_index == 'all':
         list_drum_type = complete_file_list
     else:
@@ -414,24 +415,24 @@ def extractSvlAnnotRegionFile(filename):
 
 
 
-def spectrogram_params():
-    filepath = data_params.test_filepath
+# def spectrogram_params():
+#     filepath = data_params.test_filepath
 
-    n_fft = data_params.n_fft
-    win_length = data_params.win_length
+#     n_fft = data_params.n_fft
+#     win_length = data_params.win_length
     
-    y, sr = librosa.load(filepath, sr=44100) 
+#     y, sr = librosa.load(filepath, sr=44100) 
     
-    y = np.pad(y, (0, data_params.max_audio_length - len(y)), 'constant', constant_values=(0))
-    overlap = (3*win_length)/4
-    f, t, spec = signal.stft(y, sr, nfft=n_fft)
-    plt.pcolormesh(t, f, np.abs(spec), vmin=0, vmax=2*np.sqrt(2)*np.abs(spec)[0][0])
-    plt.title('STFT Magnitude')
-    plt.ylabel('Frequency [Hz]')
-    plt.xlabel('Time [sec]')
-    plt.show()
-    mag = np.abs(spec)
-    phase = np.angle(mag)
-    return mag, f, t
+#     y = np.pad(y, (0, data_params.max_audio_length - len(y)), 'constant', constant_values=(0))
+#     overlap = (3*win_length)/4
+#     f, t, spec = signal.stft(y, sr, nfft=n_fft)
+#     plt.pcolormesh(t, f, np.abs(spec), vmin=0, vmax=2*np.sqrt(2)*np.abs(spec)[0][0])
+#     plt.title('STFT Magnitude')
+#     plt.ylabel('Frequency [Hz]')
+#     plt.xlabel('Time [sec]')
+#     plt.show()
+#     mag = np.abs(spec)
+#     phase = np.angle(mag)
+#     return mag, f, t
 
-    
+#     

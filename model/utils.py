@@ -6,7 +6,7 @@ import librosa
 from sklearn.decomposition import NMF
 import hparams
 from scipy import sparse
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from scipy import signal
 from scipy.signal import find_peaks, find_peaks_cwt
 
@@ -50,18 +50,20 @@ def get_templates():
     strip_dot = lambda x: x.split('.')[0]
     strip_hash = lambda x: x.split('#')[0] 
 
-    audio_file_list = data_utils.get_audio_files(data_dir, drum_type_index, "all")
+    audio_file_list = data_utils.get_audio_files(data_dir, drum_type_index, 0)
     
     audio_file_list = [x.split('.')[0] for x in audio_file_list]
 
     audio_file_list = audio_file_list[0:int(hparams.get_template_length*len(audio_file_list))]
     file_list_length = len(audio_file_list)
 
-    xml_file_list = data_utils.get_xml_files(data_dir, drum_type_index, "all")
+    xml_file_list = data_utils.get_xml_files(data_dir, drum_type_index, 0)
     xml_file_list = [x.split('.')[0] for x in xml_file_list]
     xml_file_list = np.intersect1d(xml_file_list, audio_file_list)
 
     audio_file_names = [x.split('#')[0] for x in audio_file_list]
+
+    import pdb; pdb.set_trace()
 
     y = concatenate_audio(audio_file_list)
     HH, KD, SD = concatenate_xml(xml_file_list, audio_file_list)
@@ -72,7 +74,6 @@ def get_templates():
     n_fft = hparams.n_fft
     win_length = hparams.win_length
     hop_length = hparams.hop_length
-    import pdb; pdb.set_trace()
     V = data_utils.spectrogram(y, n_fft, hop_length, win_length, window='hann', plotFlag=True,flag_hp=False,save_flag=False)
     
     model = NMF(n_components=3, init='custom')
@@ -157,10 +158,10 @@ def eval(filename):
     # HH_peaks = np.divide(HH_peaks, sample_rate)
     # SD_peaks = np.divide(SD_peaks, sample_rate)
     # KD_peaks = np.divide(KD_peaks, sample_rate)
-    plt.figure(); plt.plot(HH_peaks, HH_pred[HH_peaks], "ob"); plt.plot(HH_pred); plt.legend(['HH'])
-    plt.figure(); plt.plot(KD_peaks, KD_pred[KD_peaks], "ob"); plt.plot(KD_pred); plt.legend(['KD'])
-    plt.figure(); plt.plot(SD_peaks, SD_pred[SD_peaks], "ob"); plt.plot(SD_pred); plt.legend(['SD'])    
-    plt.show()
+    # plt.figure(); plt.plot(HH_peaks, HH_pred[HH_peaks], "ob"); plt.plot(HH_pred); plt.legend(['HH'])
+    # plt.figure(); plt.plot(KD_peaks, KD_pred[KD_peaks], "ob"); plt.plot(KD_pred); plt.legend(['KD'])
+    # plt.figure(); plt.plot(SD_peaks, SD_pred[SD_peaks], "ob"); plt.plot(SD_pred); plt.legend(['SD'])    
+    # plt.show()
 
     pred_time_HH = t[HH_peaks]
     pred_time_KD = t[KD_peaks]
@@ -211,15 +212,15 @@ def tweak_eval_params(filename):
     peaks3, _ = find_peaks(HH_pred, width=20)
     peaks4, _ = find_peaks(HH_pred, threshold=0.4)     # Required vertical distance to its direct neighbouring samples, pretty useless
     
-    plt.subplot(2, 2, 1)
-    plt.plot(peaks, HH_pred[peaks], "xr"); plt.plot(HH_pred); plt.legend(['distance'])
-    plt.subplot(2, 2, 2)
-    plt.plot(peaks2, HH_pred[peaks2], "ob"); plt.plot(HH_pred); plt.legend(['prominence'])
-    plt.subplot(2, 2, 3)
-    plt.plot(peaks3, HH_pred[peaks3], "vg"); plt.plot(HH_pred); plt.legend(['width'])
-    plt.subplot(2, 2, 4)
-    plt.plot(peaks4, HH_pred[peaks4], "xk"); plt.plot(HH_pred); plt.legend(['threshold'])
-    plt.show()
+    # plt.subplot(2, 2, 1)
+    # plt.plot(peaks, HH_pred[peaks], "xr"); plt.plot(HH_pred); plt.legend(['distance'])
+    # plt.subplot(2, 2, 2)
+    # plt.plot(peaks2, HH_pred[peaks2], "ob"); plt.plot(HH_pred); plt.legend(['prominence'])
+    # plt.subplot(2, 2, 3)
+    # plt.plot(peaks3, HH_pred[peaks3], "vg"); plt.plot(HH_pred); plt.legend(['width'])
+    # plt.subplot(2, 2, 4)
+    # plt.plot(peaks4, HH_pred[peaks4], "xk"); plt.plot(HH_pred); plt.legend(['threshold'])
+    # plt.show()
 
     # for i in range(len(HH_gt_onset)):
     #     HH_gt_onset[i] = find_nearest(t, HH_gt_onset[i])
