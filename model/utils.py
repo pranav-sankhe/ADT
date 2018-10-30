@@ -6,7 +6,7 @@ import librosa
 from sklearn.decomposition import NMF
 import hparams
 from scipy import sparse
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 from scipy import signal
 from scipy.signal import find_peaks, find_peaks_cwt
 
@@ -63,7 +63,7 @@ def get_templates():
 
     audio_file_names = [x.split('#')[0] for x in audio_file_list]
 
-    import pdb; pdb.set_trace()
+    
 
     y = concatenate_audio(audio_file_list)
     HH, KD, SD = concatenate_xml(xml_file_list, audio_file_list)
@@ -71,16 +71,17 @@ def get_templates():
     activations[0, :] = HH
     activations[1, :] = KD
     activations[2, :] = SD
+    
     n_fft = hparams.n_fft
     win_length = hparams.win_length
     hop_length = hparams.hop_length
-    V = data_utils.spectrogram(y, n_fft, hop_length, win_length, window='hann', plotFlag=True,flag_hp=False,save_flag=False)
+    t, V = data_utils.spectrogram(np.array(y), n_fft, hop_length, win_length, window='hann', plotFlag=True,flag_hp=True,save_flag=False)
     
     model = NMF(n_components=3, init='custom')
-    template = model.fit_transform(V, W = avg_template , H = activations)
+    template = model.fit_transform(V, W = np.random.rand() , H = activations)
         
-    np.save('templates', avg_template)                
-    return avg_template
+    np.save('templates', template)                
+    return template
 
         
 

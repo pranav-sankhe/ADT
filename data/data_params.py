@@ -5,7 +5,7 @@ num_gen_type = 3
 gen_type = ['RealDrum', 'TechnoDrum_02', 'WaveDrum_02']
 
 max_audio_length = 1323000
-sample_rate = 44100
+sample_rate = 44100.0
 
 n_fft = 4096
 hop_length = 64

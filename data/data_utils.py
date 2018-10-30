@@ -1,5 +1,5 @@
 import numpy as np 
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import librosa
 from scipy import signal
 # import tensorflow as tf 
@@ -22,8 +22,8 @@ def spectrogram(y, n_fft, hop_length, win_length, window='hann', plotFlag=True,f
     
         # plt.subplot(211)    
         # librosa.display.specshow(librosa.amplitude_to_db(D_harm,
-                               #                         ref=np.max),
-                               # y_axis='log', x_axis='time')
+        #                                                ref=np.max),
+        #                        y_axis='log', x_axis='time')
         # plt.title('Harmonic')    
         
         # plt.colorbar(format='%+2.0f dB')
@@ -39,10 +39,20 @@ def spectrogram(y, n_fft, hop_length, win_length, window='hann', plotFlag=True,f
         # plt.tight_layout()
         # if plotFlag:
         #     plt.show()
-        return D_perc        
+        sample_rate = data_params.sample_rate
+        num_samples = len(y)
+        time_len = num_samples/sample_rate
+        
+        start = float(win_length)/(2*sample_rate)
+        end = time_len
+        step = hop_length/sample_rate
+        segmented_time = np.arange(start=start, stop=end, step=step)
+        import pdb; pdb.set_trace()
+        return segmented_time, D_perc
+
     else:        
         D = librosa.stft(y, n_fft, hop_length, win_length, window='hann')
-        librosa.display.specshow(librosa.amplitude_to_db(D,ref=np.max),y_axis='log', x_axis='time')
+        # librosa.display.specshow(librosa.amplitude_to_db(D,ref=np.max),y_axis='log', x_axis='time')
         # plt.title(':Power spectrogram: First ' + str(len(y)) + ' iterations' + ' with hopsize = ' + str(hop_length))
         # plt.colorbar(format='%+2.0f dB')
         # if save_flag:
@@ -161,7 +171,7 @@ def find_nearest(a, a0):
     return a.flat[idx]
 
 
-def create_gt_activations_xml(xml_filepath, audio_filepath):
+def create_gt_activations_xml(xml_filepath, audio_filepath, n_fft, hop_length, win_length):
     drums, onset_times, offset_times = read_xml_file(xml_filepath)
     sample_rate = data_params.sample_rate
     num_drums = len(drums)
@@ -179,7 +189,8 @@ def create_gt_activations_xml(xml_filepath, audio_filepath):
             SD_gt_onset.append(onset_times[i]*sample_rate)
 
     y, sr = librosa.load(audio_filepath, sr=data_params.sample_rate)        
-    T = len(y)
+    t, spec = data_utils.spectrogram(y, n_fft, hop_length, win_length, window='hann', plotFlag=True,flag_hp=True,save_flag=False)
+    T = len(t)
     activation_HH = np.zeros(T)
     activation_SD = np.zeros(T)
     activation_KD = np.zeros(T)
@@ -189,7 +200,7 @@ def create_gt_activations_xml(xml_filepath, audio_filepath):
     for i in KD_gt_onset:
         activation_KD[int(i)] = 1
     for i in SD_gt_onset:
-        activation_SD[int(i)] = 1        
+        activation_SD[int(i)] = 1
     
     return activation_HH, activation_KD, activation_SD
 
@@ -224,7 +235,7 @@ def get_audio_files(data_dir, drum_type_index, gen_type_index):
     complete_file_list = os.listdir(audio_dir)            
     length = len(complete_file_list)
     list_drum_type = []
-    import pdb; pdb.set_trace()
+
     if drum_type_index == 'all':
         list_drum_type = complete_file_list
     else:
@@ -236,8 +247,9 @@ def get_audio_files(data_dir, drum_type_index, gen_type_index):
     if gen_type_index == 'all':
         list_gen_type = complete_file_list
     else:
-        if complete_file_list[i].find(gen_type[gen_type_index])!= -1:
-            list_gen_type.append(complete_file_list[i])                
+        for i in range(length):
+            if complete_file_list[i].find(gen_type[gen_type_index])!= -1:
+                list_gen_type.append(complete_file_list[i])                
 
     drum_recording_list = np.intersect1d(list_drum_type, list_gen_type)
 
