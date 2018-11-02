@@ -8,8 +8,8 @@ max_audio_length = 1323000
 sample_rate = 44100.0
 
 n_fft = 4096
-hop_length = 64
 win_length = 2048
+hop_length = int(win_length/4.0)
 window='hann'
 
 
