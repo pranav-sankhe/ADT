@@ -28,6 +28,7 @@ win_lengths =  eval_params.win_lengths
 #------------------------------------------------------------------------------------------------------------------------------------
 
 f_measure_list_eval = []
+print("Running evaluation for hop_lengths")
 hop_lengths = [int(win_length/4.0), int(win_length/8.0), int(win_length/12.0), int(win_length/16.0), int(win_length/32.0), int(win_length/64.0)]
 for hop_length in hop_lengths:
 
@@ -190,7 +191,7 @@ np.save('f_measure_hops', f_measure_list_eval)
 
 f_measure_list_eval = []
 n_ffts = [512, 1024, 2048, 4096, 8192] 
-
+print("Running evaluation for FFT lengths")
 for n_fft in n_ffts:
 
 
@@ -354,7 +355,7 @@ np.save('f_measure_nffs', f_measure_list_eval)
 f_measure_list_eval = []
 
 win_lengths =  [512, 1024, 2048, 4096, 8192]
-
+print("Running evaluation for wimdow lengths")
 for win_length in win_lengths:
 
 
