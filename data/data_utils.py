@@ -11,7 +11,7 @@ import librosa.display
 from scipy.io import wavfile as wav
 
 def spectrogram(y, n_fft, hop_length, win_length, window='hann', plotFlag=True,flag_hp=False,save_flag=False):
-
+    print("Computing the spectrogram....")
     # write('../test_audio/fut.wav', sr, y)      #write file under test
     if flag_hp:
         y_harm, y_perc = librosa.effects.hpss(y)
@@ -19,7 +19,7 @@ def spectrogram(y, n_fft, hop_length, win_length, window='hann', plotFlag=True,f
         D_harm = librosa.stft(y_harm, n_fft, hop_length, win_length, window='hann')
         D_perc = librosa.stft(y_perc, n_fft, hop_length, win_length, window='hann')
 
-    
+        
         # plt.subplot(211)    
         # librosa.display.specshow(librosa.amplitude_to_db(D_harm,
         #                                                ref=np.max),
@@ -43,12 +43,11 @@ def spectrogram(y, n_fft, hop_length, win_length, window='hann', plotFlag=True,f
         num_samples = len(y)
         time_len = num_samples/sample_rate
         
-        start = float(win_length)/(2*sample_rate)
+        start = 0
         end = time_len
         step = hop_length/sample_rate
         segmented_time = np.arange(start=start, stop=end, step=step)
-        import pdb; pdb.set_trace()
-        return segmented_time, D_perc
+        return segmented_time, np.absolute(D_perc)
 
     else:        
         D = librosa.stft(y, n_fft, hop_length, win_length, window='hann')
@@ -172,6 +171,7 @@ def find_nearest(a, a0):
 
 
 def create_gt_activations_xml(xml_filepath, audio_filepath, n_fft, hop_length, win_length):
+    print("Creating activations from file " + audio_filepath + ' ....')
     drums, onset_times, offset_times = read_xml_file(xml_filepath)
     sample_rate = data_params.sample_rate
     num_drums = len(drums)
@@ -189,20 +189,25 @@ def create_gt_activations_xml(xml_filepath, audio_filepath, n_fft, hop_length, w
             SD_gt_onset.append(onset_times[i]*sample_rate)
 
     y, sr = librosa.load(audio_filepath, sr=data_params.sample_rate)        
-    t, spec = data_utils.spectrogram(y, n_fft, hop_length, win_length, window='hann', plotFlag=True,flag_hp=True,save_flag=False)
+    t, spec = spectrogram(y, n_fft, hop_length, win_length, window='hann', plotFlag=True,flag_hp=True,save_flag=False)
     T = len(t)
     activation_HH = np.zeros(T)
     activation_SD = np.zeros(T)
     activation_KD = np.zeros(T)
-        
+
     for i in HH_gt_onset:
-        activation_HH[int(i)] = 1
+        idx = np.abs(t - i).argmin()
+        activation_HH[idx] = 1
     for i in KD_gt_onset:
-        activation_KD[int(i)] = 1
+        idx = np.abs(t - i).argmin()
+        activation_HH[idx] = 1
     for i in SD_gt_onset:
-        activation_SD[int(i)] = 1
-    
+        idx = np.abs(t - i).argmin()
+        activation_HH[idx] = 1    
+
     return activation_HH, activation_KD, activation_SD
+
+
 
 def create_gt_activations_svl(svl_filepath, audio_filepath):
     sample_rate = data_params.sample_rate
