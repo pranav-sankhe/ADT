@@ -9,7 +9,7 @@ sample_rate = 44100.0
 
 n_fft = 4096
 win_length = 2048
-hop_length = int(win_length/4.0)
+hop_length = int(win_length/16.0)
 window='hann'
 
 

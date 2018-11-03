@@ -5,7 +5,6 @@ sys.path.insert(0, '../data')
 import data_utils
 import hparams
 import utils
-import eval_params
 import librosa
 from sklearn.decomposition import NMF
 from scipy.signal import find_peaks, find_peaks_cwt
@@ -20,11 +19,6 @@ gen_type_index = 0
 n_fft = hparams.n_fft
 win_length = hparams.win_length
 hop_length = hparams.hop_length
-
-# Eval parameters
-n_ffts = eval_params.n_ffts
-win_lengths =  eval_params.win_lengths
-
 #------------------------------------------------------------------------------------------------------------------------------------
 
 f_measure_list_eval = []

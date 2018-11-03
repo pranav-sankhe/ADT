@@ -164,9 +164,9 @@ def eval(filename):
     KD_pred = pred_activations[1, :]
     SD_pred = pred_activations[2, :]
     
-    HH_peaks, _ = find_peaks(HH_pred, width=1, prominence=3) 
-    KD_peaks, _ = find_peaks(KD_pred, width=1, prominence=3) 
-    SD_peaks, _ = find_peaks(SD_pred, width=1, prominence=3) 
+    HH_peaks, _ = find_peaks(HH_pred, width=0.1, prominence=2.5) 
+    KD_peaks, _ = find_peaks(KD_pred, width=2, prominence=3.5) 
+    SD_peaks, _ = find_peaks(SD_pred, width=0, prominence=1) 
 
     # plt.figure(); plt.plot(HH_peaks, HH_pred[HH_peaks], "ob"); plt.plot(HH_pred); plt.legend(['HH'])
     # plt.figure(); plt.plot(KD_peaks, KD_pred[KD_peaks], "ob"); plt.plot(KD_pred); plt.legend(['KD'])
@@ -189,7 +189,10 @@ def eval(filename):
     gt_all = np.append(HH_gt_onset, KD_gt_onset) 
     gt_all = np.append(gt_all, SD_gt_onset)
     gt_all = np.sort(gt_all)
+    print ('Length of predicted beats ', len(pred_time_all))
+    print ('Length of ground truth beats ', len(gt_all))
     f_measure = mir_eval.beat.f_measure(gt_all, pred_time_all)
+    print('F-measure = ', f_measure)
     
     # plt.subplot(3, 1, 1)
     # HH_peaks, _ = find_peaks(HH_pred, width=1.2, prominence=2.7) 
