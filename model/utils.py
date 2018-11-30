@@ -44,7 +44,7 @@ def get_templates():
     gen_type = hparams.gen_type
     drum_type_index = 3         # select 'MIX' 
     data_dir = hparams.data_dir
-    gen_type_index = 0
+    gen_type_index = 2
     n_fft = hparams.n_fft
     win_length = hparams.win_length
     hop_length = hparams.hop_length
@@ -164,15 +164,15 @@ def eval(filename):
     KD_pred = pred_activations[1, :]
     SD_pred = pred_activations[2, :]
     
-    HH_peaks, _ = find_peaks(HH_pred, width=0.1, prominence=2.5) 
-    KD_peaks, _ = find_peaks(KD_pred, width=2, prominence=3.5) 
-    SD_peaks, _ = find_peaks(SD_pred, width=0, prominence=1) 
+    HH_peaks, _ = find_peaks(HH_pred, width=0.1, prominence=0.23)
+    KD_peaks, _ = find_peaks(KD_pred, width=2.5, prominence=2.8)
+    SD_peaks, _ = find_peaks(SD_pred, width=1, prominence=2.4)
 
-    # plt.figure(); plt.plot(HH_peaks, HH_pred[HH_peaks], "ob"); plt.plot(HH_pred); plt.legend(['HH'])
-    # plt.figure(); plt.plot(KD_peaks, KD_pred[KD_peaks], "ob"); plt.plot(KD_pred); plt.legend(['KD'])
-    # plt.figure(); plt.plot(SD_peaks, SD_pred[SD_peaks], "ob"); plt.plot(SD_pred); plt.legend(['SD'])
+    plt.figure(); plt.plot(HH_peaks, HH_pred[HH_peaks], "ob"); plt.plot(HH_pred); plt.legend(['HH'])
+    plt.figure(); plt.plot(KD_peaks, KD_pred[KD_peaks], "ob"); plt.plot(KD_pred); plt.legend(['KD'])
+    plt.figure(); plt.plot(SD_peaks, SD_pred[SD_peaks], "ob"); plt.plot(SD_pred); plt.legend(['SD'])
 
-
+    import pdb; pdb.set_trace
     pred_time_HH = t[HH_peaks]
     pred_time_KD = t[KD_peaks]
     pred_time_SD = t[SD_peaks]
@@ -182,17 +182,31 @@ def eval(filename):
     f_measure_SD = mir_eval.beat.f_measure(np.array(SD_gt_onset), np.array(pred_time_SD))
     f_measure_KD = mir_eval.beat.f_measure(np.array(KD_gt_onset), np.array(pred_time_KD))
         
-    pred_time_all = np.append(pred_time_HH, pred_time_KD)
-    pred_time_all = np.append(pred_time_all ,pred_time_SD)
-    pred_time_all = np.sort(pred_time_all)
+    # pred_time_all = np.append(pred_time_HH, pred_time_KD)
+    # pred_time_all = np.append(pred_time_all ,pred_time_SD)
+    # pred_time_all = np.sort(pred_time_all)
 
-    gt_all = np.append(HH_gt_onset, KD_gt_onset) 
-    gt_all = np.append(gt_all, SD_gt_onset)
-    gt_all = np.sort(gt_all)
-    print ('Length of predicted beats ', len(pred_time_all))
-    print ('Length of ground truth beats ', len(gt_all))
-    f_measure = mir_eval.beat.f_measure(gt_all, pred_time_all)
-    print('F-measure = ', f_measure)
+    # gt_all = np.append(HH_gt_onset, KD_gt_onset) 
+    # gt_all = np.append(gt_all, SD_gt_onset)
+    # gt_all = np.sort(gt_all)
+    # print ('Length of predicted beats ', len(pred_time_all))
+    # print ('Length of ground truth beats ', len(gt_all))
+    # f_measure = mir_eval.beat.f_measure(gt_all, pred_time_all)
+    # print('F-measure = ', f_measure)
+        
+    f_measure_avg = (f_measure_HH + f_measure_SD + f_measure_KD)/3.0
+    
+    
+    
+    
+    print('length of predicted beats for HH = ',  len(pred_time_HH), 'gt beats = ', len(HH_gt_onset))
+    print('F-measure for HH = ', f_measure_HH)
+    print('length of predicted beats for KD = ',  len(pred_time_KD), 'gt beats = ', len(KD_gt_onset))
+    print('F-measure for KD = ', f_measure_KD)
+    print('length of predicted beats for SD = ',  len(pred_time_SD), 'gt beats = ', len(SD_gt_onset))
+    print('F-measure for SD = ', f_measure_SD)
+    print('')
+    print('Average F-measure = ', f_measure_avg)
     
     # plt.subplot(3, 1, 1)
     # HH_peaks, _ = find_peaks(HH_pred, width=1.2, prominence=2.7) 
@@ -206,4 +220,4 @@ def eval(filename):
     # plt.show()
 
     
-    return f_measure
+    return f_measure_avg

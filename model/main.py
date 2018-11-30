@@ -14,7 +14,7 @@ import utils
 gen_type = hparams.gen_type
 drum_type_index = 3         # select 'MIX' 
 data_dir = hparams.data_dir
-gen_type_index = 'all'
+gen_type_index = 1
 
 audio_file_list = data_utils.get_audio_files(data_dir, drum_type_index, gen_type_index)
 
@@ -28,7 +28,6 @@ xml_file_list = [x.split('.')[0] for x in xml_file_list]
 xml_file_list = np.intersect1d(xml_file_list, audio_file_list)
 
 audio_file_names = [x.split('#')[0] for x in audio_file_list]
-
 f_measure = []
 
 for file in audio_file_list:

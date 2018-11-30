@@ -212,9 +212,10 @@ def create_gt_activations_xml(xml_filepath, audio_filepath, n_fft, hop_length, w
 def create_gt_activations_svl(svl_filepath, audio_filepath):
     sample_rate = data_params.sample_rate
     frames = extractSvlAnnotRegionFile(svl_filepath)    
-    y, sr = librosa.load(audio_filepath, sr=data_params.sample_rate)        
+    y, sr = librosa.load(audio_filepath, sr=data_params.sample_rate)
     T = len(y)
     activation = np.zeros(T)
+    # import pdb; pdb.set_trace()
     for i in frames:
         activation[int(i)] = 1
 
@@ -432,24 +433,6 @@ def extractSvlAnnotRegionFile(filename):
 
 
 
-# def spectrogram_params():
-#     filepath = data_params.test_filepath
 
-#     n_fft = data_params.n_fft
-#     win_length = data_params.win_length
-    
-#     y, sr = librosa.load(filepath, sr=44100) 
-    
-#     y = np.pad(y, (0, data_params.max_audio_length - len(y)), 'constant', constant_values=(0))
-#     overlap = (3*win_length)/4
-#     f, t, spec = signal.stft(y, sr, nfft=n_fft)
-#     plt.pcolormesh(t, f, np.abs(spec), vmin=0, vmax=2*np.sqrt(2)*np.abs(spec)[0][0])
-#     plt.title('STFT Magnitude')
-#     plt.ylabel('Frequency [Hz]')
-#     plt.xlabel('Time [sec]')
-#     plt.show()
-#     mag = np.abs(spec)
-#     phase = np.angle(mag)
-#     return mag, f, t
 
-#     
+
