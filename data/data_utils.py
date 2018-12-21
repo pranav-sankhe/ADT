@@ -194,7 +194,7 @@ def create_gt_activations_xml(xml_filepath, audio_filepath, n_fft, hop_length, w
     activation_HH = np.zeros(T)
     activation_SD = np.zeros(T)
     activation_KD = np.zeros(T)
-
+    
     for i in HH_gt_onset:
         idx = np.abs(t - i).argmin()
         activation_HH[idx] = 1
@@ -207,19 +207,102 @@ def create_gt_activations_xml(xml_filepath, audio_filepath, n_fft, hop_length, w
 
     return activation_HH, activation_KD, activation_SD
 
+def get_onsets_svl(audio_filepath):
+    print("Reading onsets from file " + audio_filepath + ' ....')
+
+    base_path_list = audio_filepath.split('.')[2].split('/')
+    base_path = '../' +  base_path_list[1] + '/' + base_path_list[2] + '/annotation_svl' + '/' + base_path_list[4][:-3]
+
+    HH_svl_filepath = base_path + 'HH.svl'
+    KD_svl_filepath = base_path + 'KD.svl'
+    SD_svl_filepath = base_path + 'SD.svl'
+
+    HH_gt_frames = extractSvlAnnotRegionFile(HH_svl_filepath)
+    KD_gt_frames = extractSvlAnnotRegionFile(KD_svl_filepath)    
+    SD_gt_frames = extractSvlAnnotRegionFile(SD_svl_filepath)    
+
+    return HH_gt_frames, KD_gt_frames, SD_gt_frames
 
 
-def create_gt_activations_svl(svl_filepath, audio_filepath):
+def create_gt_activations_svl(audio_filepath, n_fft, hop_length, win_length):
+    print("Creating activations from file " + audio_filepath + ' ....')
     sample_rate = data_params.sample_rate
-    frames = extractSvlAnnotRegionFile(svl_filepath)    
-    y, sr = librosa.load(audio_filepath, sr=data_params.sample_rate)
-    T = len(y)
-    activation = np.zeros(T)
-    # import pdb; pdb.set_trace()
-    for i in frames:
-        activation[int(i)] = 1
 
-    return activation
+    y, sr = librosa.load(audio_filepath, sr=data_params.sample_rate)        
+    t, spec = spectrogram(y, n_fft, hop_length, win_length, window='hann', plotFlag=True,flag_hp=True,save_flag=False)
+    T = len(t)
+    t = np.multiply(t, sample_rate)
+    
+    HH_Ncomponents = data_params.HH_Ncomponents
+    KD_Ncomponents = data_params.KD_Ncomponents
+    SD_Ncomponents = data_params.SD_Ncomponents
+    nmf_Ncomponents = HH_Ncomponents + KD_Ncomponents + SD_Ncomponents
+    
+    HH_activation = np.zeros((HH_Ncomponents ,T))
+    KD_activation = np.zeros((KD_Ncomponents ,T))
+    SD_activation = np.zeros((SD_Ncomponents ,T))    
+
+    activations = np.zeros((nmf_Ncomponents, T))
+
+    
+
+    
+    base_path_list = audio_filepath.split('.')[2].split('/')
+    base_path = '../' +  base_path_list[1] + '/' + base_path_list[2] + '/annotation_svl' + '/' + base_path_list[4][:-3]
+
+    HH_svl_filepath = base_path + 'HH.svl'
+    KD_svl_filepath = base_path + 'KD.svl'
+    SD_svl_filepath = base_path + 'SD.svl'
+
+    gt_frames = extractSvlAnnotRegionFile(HH_svl_filepath)
+    for i in range(HH_Ncomponents):    
+        output = multiple_activations(HH_Ncomponents, gt_frames, t)
+        for i in range(len(output)):
+            for j in output[i]:
+                idx = np.abs(t - j).argmin()
+                HH_activation[i, idx] = 1
+    
+    gt_frames = extractSvlAnnotRegionFile(KD_svl_filepath)    
+    for i in range(KD_Ncomponents):    
+        output = multiple_activations(HH_Ncomponents, gt_frames, t)
+        for i in range(len(output)):
+            for j in output[i]:
+                idx = np.abs(t - j).argmin()
+                KD_activation[i, idx] = 1
+
+    gt_frames = extractSvlAnnotRegionFile(SD_svl_filepath)    
+    for i in range(SD_Ncomponents):    
+        output = multiple_activations(HH_Ncomponents, gt_frames, t)
+        for i in range(len(output)):
+            for j in output[i]:
+                idx = np.abs(t - j).argmin()
+                SD_activation[i, idx] = 1
+
+    # activations[0:HH_Ncomponents] = HH_activation
+    # activations[HH_Ncomponents : HH_Ncomponents + KD_Ncomponents] = KD_activation
+    # activations[HH_Ncomponents + KD_Ncomponents :] = SD_activation
+    # import pdb; pdb.set_trace()
+    return HH_activation, KD_activation, SD_activation
+
+
+def multiple_activations(num_channels, activation, t):
+    output_matrix = []
+    num_samples = len(activation)
+
+    seg_len = num_samples/num_channels
+    start_list = []
+    end_list = []
+    x = 0
+    for i in range(num_channels):
+        start_list.append(int(x))
+        end_list.append(int(x + seg_len))
+        x = x + seg_len
+    end_list[-1] = num_samples
+
+    for i in range(num_channels):
+        output_matrix.append(activation[start_list[i] : end_list[i]])
+    
+    return output_matrix    
 
             
 def get_audio_files(data_dir, drum_type_index, gen_type_index):
@@ -304,8 +387,6 @@ def get_xml_files(data_dir, drum_type_index, gen_type_index):
 
     return drum_recording_list
 
-
-# readSVLfiles.py
 
 
 def read_xml_file(filepath):
@@ -433,6 +514,9 @@ def extractSvlAnnotRegionFile(filename):
 
 
 
-
-
+# n_fft = data_params.n_fft
+# hop_length = data_params.hop_length
+# win_length = data_params.win_length
+# array = create_gt_activations_svl('RealDrum01_00#MIX.wav', n_fft, hop_length, win_length)
+# import pdb; pdb.set_trace()
 

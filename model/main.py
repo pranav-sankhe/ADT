@@ -5,12 +5,12 @@ sys.path.insert(0, '../data')
 import data_utils
 import hparams
 import utils
-#------------------------------------------------------------------------------------------------------------------------------------
+# #------------------------------------------------------------------------------------------------------------------------------------
 # utils.get_templates()
-#------------------------------------------------------------------------------------------------------------------------------------
+# #------------------------------------------------------------------------------------------------------------------------------------
 
 
-#------------------------------------------------------------------------------------------------------------------------------------
+# #------------------------------------------------------------------------------------------------------------------------------------
 gen_type = hparams.gen_type
 drum_type_index = 3         # select 'MIX' 
 data_dir = hparams.data_dir
@@ -21,20 +21,20 @@ audio_file_list = data_utils.get_audio_files(data_dir, drum_type_index, gen_type
 audio_file_list = [x.split('.')[0] for x in audio_file_list]
 
 audio_file_list = audio_file_list[0:int(hparams.get_template_length*len(audio_file_list))]
-file_list_length = len(audio_file_list)
+# file_list_length = len(audio_file_list)
 
-xml_file_list = data_utils.get_xml_files(data_dir, drum_type_index, gen_type_index)
-xml_file_list = [x.split('.')[0] for x in xml_file_list]
-xml_file_list = np.intersect1d(xml_file_list, audio_file_list)
+# xml_file_list = data_utils.get_xml_files(data_dir, drum_type_index, gen_type_index)
+# xml_file_list = [x.split('.')[0] for x in xml_file_list]
+# xml_file_list = np.intersect1d(xml_file_list, audio_file_list)
 
-audio_file_names = [x.split('#')[0] for x in audio_file_list]
+# audio_file_names = [x.split('#')[0] for x in audio_file_list]
 f_measure = []
 
 for file in audio_file_list:
 	f_measure.append(utils.eval(file))
 
 print('Average F-measure = ', np.mean(f_measure))
-#------------------------------------------------------------------------------------------------------------------------------------
+# #------------------------------------------------------------------------------------------------------------------------------------
 
 
 
@@ -60,10 +60,23 @@ print('Average F-measure = ', np.mean(f_measure))
 # HH_templates = templates[:,0]
 # KD_templates = templates[:,1]
 # SD_templates = templates[:,2]
+# for i in range(templates.shape[1]):
+# 	plt.figure()
+# 	plt.plot(templates[:,i]); plt.legend([i])	
+# 	plt.xlabel('Time in samples')
+# 	plt.ylabel('Amplitude')
+
 # plt.figure()
 # plt.plot(HH_templates); plt.legend(['HH'])
+# plt.xlabel('Time in samples')
+# plt.ylabel('Amplitude')
 # plt.figure()
 # plt.plot(KD_templates); plt.legend(['KD'])
+# plt.xlabel('Time in samples')
+# plt.ylabel('Amplitude')
 # plt.figure()
 # plt.plot(SD_templates); plt.legend(['SD'])
+# plt.xlabel('Time in samples')
+# plt.ylabel('Amplitude')
+# plt.show()
 #------------------------------------------------------------------------------------------------------------------------------------
