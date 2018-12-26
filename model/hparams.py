@@ -12,9 +12,9 @@ sample_rate = 44100
 get_template_length = 1
 test_filepath = '/Users/sabsathai/Documents/projects/drum_transcription/data/test.wav'
 
-HH_Ncomponents = 2
-KD_Ncomponents = 2
-SD_Ncomponents = 2
+HH_Ncomponents = 4
+KD_Ncomponents = 4
+SD_Ncomponents = 4
 
 solver = 'cd'#'mu'
 max_iter = 200

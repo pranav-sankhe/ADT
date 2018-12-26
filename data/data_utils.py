@@ -255,28 +255,28 @@ def create_gt_activations_svl(audio_filepath, n_fft, hop_length, win_length):
     SD_svl_filepath = base_path + 'SD.svl'
 
     gt_frames = extractSvlAnnotRegionFile(HH_svl_filepath)
-    for i in range(HH_Ncomponents):    
-        output = multiple_activations(HH_Ncomponents, gt_frames, t)
-        for i in range(len(output)):
-            for j in output[i]:
-                idx = np.abs(t - j).argmin()
-                HH_activation[i, idx] = 1
-    
+    # for i in range(HH_Ncomponents):    
+    output = multiple_activations(HH_Ncomponents, gt_frames, t)
+    for i in range(len(output)):
+        for j in output[i]:
+            idx = np.abs(t - j).argmin()
+            HH_activation[i, idx] = 1
+
     gt_frames = extractSvlAnnotRegionFile(KD_svl_filepath)    
-    for i in range(KD_Ncomponents):    
-        output = multiple_activations(HH_Ncomponents, gt_frames, t)
-        for i in range(len(output)):
-            for j in output[i]:
-                idx = np.abs(t - j).argmin()
-                KD_activation[i, idx] = 1
+    
+    output = multiple_activations(HH_Ncomponents, gt_frames, t)
+    for i in range(len(output)):
+        for j in output[i]:
+            idx = np.abs(t - j).argmin()
+            KD_activation[i, idx] = 1
 
     gt_frames = extractSvlAnnotRegionFile(SD_svl_filepath)    
-    for i in range(SD_Ncomponents):    
-        output = multiple_activations(HH_Ncomponents, gt_frames, t)
-        for i in range(len(output)):
-            for j in output[i]:
-                idx = np.abs(t - j).argmin()
-                SD_activation[i, idx] = 1
+
+    output = multiple_activations(HH_Ncomponents, gt_frames, t)
+    for i in range(len(output)):
+        for j in output[i]:
+            idx = np.abs(t - j).argmin()
+            SD_activation[i, idx] = 1
 
     # activations[0:HH_Ncomponents] = HH_activation
     # activations[HH_Ncomponents : HH_Ncomponents + KD_Ncomponents] = KD_activation

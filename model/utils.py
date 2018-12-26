@@ -215,14 +215,14 @@ def eval(filename):
 
 
     pred_activations = predict_activations(filename)
-    # import pdb; pdb.set_trace()
+    
     HH_pred = np.add(pred_activations[0, :], pred_activations[1, :])
     KD_pred = np.add(pred_activations[2, :], pred_activations[3, :])
     SD_pred = np.add(pred_activations[4, :], pred_activations[5, :])
     
-    HH_peaks, _ = find_peaks(HH_pred, width=2.5, prominence=3)
-    KD_peaks, _ = find_peaks(KD_pred, width=3, prominence=3)
-    SD_peaks, _ = find_peaks(SD_pred, width=2.5, prominence=3)
+    HH_peaks, _ = find_peaks(HH_pred, width=3, prominence=4)
+    KD_peaks, _ = find_peaks(KD_pred, width=3, prominence=4)
+    SD_peaks, _ = find_peaks(SD_pred, width=3, prominence=4)
 
     plt.figure(); plt.plot(HH_peaks, HH_pred[HH_peaks], "ob"); plt.plot(HH_pred); plt.legend(['HH'])
     plt.xlabel('Time in samples')
@@ -243,7 +243,6 @@ def eval(filename):
     f_measure_HH = mir_eval.beat.f_measure(HH_gt_onset,pred_time_HH)
     f_measure_KD = mir_eval.beat.f_measure(KD_gt_onset,pred_time_KD)
     f_measure_SD = mir_eval.beat.f_measure(SD_gt_onset, pred_time_SD)
-
     # f_measure_HH = mir_eval.onset.f_measure(np.array(HH_gt_onset), np.array(pred_time_HH), window=0.05)
     # pred_time_all = np.append(pred_time_HH, pred_time_KD)
     # pred_time_all = np.append(pred_time_all ,pred_time_SD)
@@ -283,4 +282,4 @@ def eval(filename):
     # plt.show()
 
     
-    return f_measure_avg
+    return f_measure_HH, f_measure_KD, f_measure_SD, f_measure_avg

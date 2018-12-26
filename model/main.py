@@ -29,11 +29,24 @@ audio_file_list = audio_file_list[0:int(hparams.get_template_length*len(audio_fi
 
 # audio_file_names = [x.split('#')[0] for x in audio_file_list]
 f_measure = []
+f_measure_HH = []
+f_measure_KD = []
+f_measure_SD = []
 
 for file in audio_file_list:
-	f_measure.append(utils.eval(file))
+	f_HH, f_KD, f_SD, f_avg = utils.eval(file)
+	f_measure_HH.append(f_HH)
+	f_measure_KD.append(f_KD)
+	f_measure_SD.append(f_SD)
+	f_measure.append(f_avg)
+
+plt.figure(); plt.plot(f_measure_HH); plt.legend(['HH'])
+plt.figure(); plt.plot(f_measure_KD); plt.legend(['KD'])
+plt.figure(); plt.plot(f_measure_SD); plt.legend(['SD'])
 
 print('Average F-measure = ', np.mean(f_measure))
+plt.show()
+
 # #------------------------------------------------------------------------------------------------------------------------------------
 
 

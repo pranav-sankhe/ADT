@@ -12,9 +12,9 @@ win_length = 2048
 hop_length = int(win_length/16.0)
 window='hann'
 
-HH_Ncomponents = 2
-KD_Ncomponents = 2
-SD_Ncomponents = 2
+HH_Ncomponents = 4
+KD_Ncomponents = 4
+SD_Ncomponents = 4
 
 
 test_filepath = 'test.wav'
