@@ -1,0 +1,60 @@
+\chapter{Challenges}
+
+Here we enumerate over the challenges we face in developing a dual objective transcription system for percussion instruments. 
+
+\begin{itemize}
+\item Interference of multiple instruments
+\item Playing Techniques
+\item Recording Conditions and Post Production
+\item Insufficient real world datasets
+\end{itemize}
+
+\section{Interference of multiple instruments}
+The superposition of various instruments makes the recognition of a specific instrument difficult due to the overlaps in both spectral and temporal domain. \\ 
+\textbf{Percussive Instruments:} \\ 
+A basic drum kit includes drums of different sizes and well- distinguishable timbral characteristics. In a more advanced setup for studio recordings, similar drums with subtle variations in timbre often appear, resulting in sounds that are harder to differentiate. In the case of tabla, we have two indvidual tablas which the player uses to compose music. Seperating and identifying the audio from these two tablas is a research problem in its own right. This problem of interference is more severe when these sounds occur simultaneously. \\ 
+\textbf{Melodic Instruments:} \\ 
+The wide range of sounds produced from a drum kit or a tabla can potentially coincide with sound components of many melodic instruments. Pre-processing steps for suppression of melodic instruments have been proposed but haven’t been able to achieve substantial improvement. 
+
+\section{Playing Techniques}
+Playing techniques is an important aspect of expressive musical performance. For drum instruments, these techniques include basic rudiments as well as timbral variations. 
+
+\textbf{Approaches to model playing techniques:}
+\begin{itemize}
+\item A study on the automatic identification of timbral variations of the snare drum sounds induced by different excitations has been done where a classification task is formulated to differentiate sounds from different striking locations (center, halfway, edge, etc.) with different excitations (strike, rim shot, and brush)
+\item The discrepancy between more expressive gestures on a larger dataset with combinations of different drums, stick heights, stroke intensities, strike positions, and articulations has been explored
+\item Different playing techniques for cymbal sounds have been investigated too. The Differentiation is based on either the position where the cymbal is struck (bell, body, edge), how a hi-hat is played (closed, open, chick), or other special effects such as choking a cymbal with the playing hand.
+\end{itemize}
+
+All of these studies showed promising results in classifying the isolated sounds, however, when the classifier is applied to the real-world recordings, the performance dropped drastically
+
+
+
+\section{Recording Conditions and Post Production}
+In practice, it is likely that we have to deal with convolutive, time-variant, and non-linear mixtures instead of linear superpositions of single drum sounds. The acoustic conditions of the recording room and the microphone setup lead to reverberation effects that might be substantial
+The recording engineer will likely apply equalization and filtering to the microphone signal
+Mostly, the resulting signal alterations can be modeled as convolution with one or more impulse responses.
+Non-linear effects such as dynamic compression and distortion might be applied to the drum recordings.
+
+\textbf{Consequences:}
+\begin{itemize}
+\item Any methods involving machine-learning might deteriorate if the training data does not match the target data.
+\item Any methods involving decomposition based on a linear mixture model might be affected when the observed drum mixtures violate these basic assumptions. 
+\end{itemize}
+A possible strategy to counter these challenges might be data augmentation. In our case the amount of training data could be greatly enhanced by applying diverse combinations of audio processing algorithms including reverberation, distortion and dynamics processing.
+
+
+
+\section{Insufficient real world datasets}
+
+\textbf{Size:}
+The most common issue of all the existing drum transcription datasets is the insufficient amount of data. Since these datasets are created under very different conditions, they can- not be easily integrated into one large entity. Given that tabla is an Indian classical instrument, the dataset of tabla recordings is limited in size. 
+
+\textbf{Complexity:}
+The existing datasets have the tendency of over-simplifying the ADT problem. Only the drum sequences with basic patterns are presented in the dataset.
+
+\textbf{Diversity:}
+Most of these datasets do not cover a wide range of music genre and playing style. The limitation in terms of diversity can hinder the system’s capability of analyzing a wider range of music pieces. Particularly, the lack of any singing voice in the corpora ENST-Drums and IDMT-SMT-Drums indicates their insufficiency. Tests on tracks containing singing voice revealed that this poses a big problem, especially for RNN-based ADT methods. 
+
+\textbf{Homogeneity:}
+Since each dataset is most likely to be generated under fixed conditions the audio files within the same dataset tend to have high similarities.

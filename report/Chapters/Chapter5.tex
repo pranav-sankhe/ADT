@@ -1,0 +1,14 @@
+\chapter{Architecture}
+
+Here's a brief overview of the ideas of interest derieved from the Magenta's Transcription system for piano recordings. Acute details remian to be added and we plan to do that anon. 
+
+\textbf{Model} \\ 
+In all the previous attempts at ADT, all the frames are considered independent (except RNN) and are given equal importance which is not the case. The frame which contains the onset is more important than the other frames and this inspired to add an onset detector to the system \\ 
+
+
+\textbf{Data Representation} \\ 
+The input data is the mel spectrogram of the raw audio signal. This raw audio signal consists of all the drums (as well as other instruments) playing together. I wish to explore the possibility of employing BSS methods on audio signal to identify the individual drum sources. 
+After separating the individual drum sources, we can construct a n-channel input for our model. 
+The motivation to separate sources is the huge decrease in accuracy upon introduction of other instruments. \\ 
+\chapter{Future Work}
+

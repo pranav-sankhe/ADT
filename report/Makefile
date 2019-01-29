@@ -1,7 +1,7 @@
 all: main.pdf
 
-main.pdf: main.tex
-	pdflatex -shell-escape main.tex
+main.pdf: Thesis.tex
+	pdflatex -shell-escape Thesis.tex
 
 .PHONY: clean
 clean:
