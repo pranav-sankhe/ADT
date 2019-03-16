@@ -1,0 +1,1 @@
+{ 3 1 t t 3 1 t 3 1 t 4 , t c , 3 t c , 3 t , 3 1 t t 3 1 t 3 1 t 4 , t c , 3 t c , 3 t , } AC ,,, AC ,, AC ,,

@@ -1,0 +1,1 @@
+D , { N , 3m 1m t 3m } N D 3m N 3m D 3m { N , 3m 1m t 3m } N D 3m n 3m D , { n , 3m 1m T 3m } N D 3m N 3m d 3m { n , 3m 1m T 3m } N D 3m N 3m

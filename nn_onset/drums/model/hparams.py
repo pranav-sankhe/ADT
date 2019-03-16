@@ -9,3 +9,7 @@ stop_onset_gradient=False
 combined_lstm_units = 128
 frame_bidirectional = True
 weight_frame_and_activation_loss = True
+
+
+bols = ['DA', 'KI', 'GE', 'TA', 'NA', 'DIN', 'KDA', 'TIT', 'DHA', 'DHE', 'DHET', 'DHI', 'DHIN', 'RE', 'TE', 'TII', 'TIN', 'TRA']
+num_bols = len(bols)

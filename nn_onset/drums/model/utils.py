@@ -98,7 +98,7 @@ def onset_detector_model(spec, onset_labels):
   onset_losses = tf_utils.log_loss(onset_labels_flat, onset_probs_flat)
   tf.losses.add_loss(tf.reduce_mean(onset_losses))
   
-  return onset_losses 
+  return onset_outputs, onset_probs, onset_losses 
   #losses['onset'] = onset_losses
 
 
@@ -163,5 +163,26 @@ def note_detector_model(spec, frame_labels, lengths, onset_probs ,onset_outputs)
 
 
   predictions_flat = tf.cast(tf.greater_equal(frame_probs_flat, .5), tf.float32)
+
+
+
+  # Creates a pianoroll labels in red and probs in green [minibatch, 88]
+  images = {}
+  onset_pianorolls = tf.concat(
+      [
+          onset_labels[:, :, :, tf.newaxis], onset_probs[:, :, :, tf.newaxis],
+          tf.zeros(tf.shape(onset_labels))[:, :, :, tf.newaxis]
+      ],
+      axis=3)
+  images['OnsetPianorolls'] = onset_pianorolls
+  activation_pianorolls = tf.concat(
+      [
+          frame_labels[:, :, :, tf.newaxis], frame_probs[:, :, :, tf.newaxis],
+          tf.zeros(tf.shape(frame_labels))[:, :, :, tf.newaxis]
+      ],
+      axis=3)
+  images['ActivationPianorolls'] = activation_pianorolls
+
+  return frame_losses, predictions_flat, frame_labels_flat
 
 

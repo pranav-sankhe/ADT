@@ -1,0 +1,1 @@
+{{ N 3m n 3m d 3m t 3m 4 t t 3 D 3m d 3m N 3m n 3m d 3m t 3m 4 t t 3 Dg 3m d 3m Ng 3m n 3m dg 3m t 3m 4 t t 3 Dg 3m dg 3m Ng 3m ng 3m dg 3m t 3m 4 t t 3 Dg 3m dg 3m }}
