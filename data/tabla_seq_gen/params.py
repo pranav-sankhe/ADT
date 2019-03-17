@@ -1,6 +1,6 @@
 isolated_drums_dir = '../datasets/tabla/isolated/'
 onset_bol_dir = '../datasets/tabla/onsNoMap/'
-energy_threshold = 0.8
+energy_threshold = 0.1
 
 sample_rate = 44100
 unique_bols = [ 'Da', 'Dha', 'Dhere', 'Dhi', 'Dhin', 'Dhit', 'Din', 'Kda', 'Na', 'Re', 

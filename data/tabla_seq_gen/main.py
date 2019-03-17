@@ -27,23 +27,24 @@ def get_gtOnsets(filepath):
 def get_onset_time(filepath):
     y, sr = read_wave_file(filepath)
     # y = y/np.max(y)
-    window_len = 1024
-    window = np.hamming(window_len)
-    sig_energy = np.convolve(y**2,window**2,'same')
-    sig_energy = sig_energy/max(sig_energy)     #Normalize energy
-    onset_time = np.argmax(sig_energy)
+    # window_len = 1024
+    # window = np.hamming(window_len)
+    # sig_energy = np.convolve(y**2,window**2,'same')
+    # sig_energy = sig_energy/max(sig_energy)     #Normalize energy
+    # onset_time = np.argmax(sig_energy)
 
-    energy_threshold = params.energy_threshold
-    sig_energy_thresh = (sig_energy > energy_threshold).astype('float')
+    # energy_threshold = params.energy_threshold
+    # sig_energy_thresh = (sig_energy > energy_threshold).astype('float')
 
-    indices = np.nonzero(abs(sig_energy_thresh[1:] - sig_energy_thresh[0:-1]))[0]        
+    # indices = np.nonzero(abs(sig_energy_thresh[1:] - sig_energy_thresh[0:-1]))[0]        
     
-    start_indices = [indices[2*i] for i in range(len(indices)/2)]
-    end_indices   = [indices[2*i+1] for i in range(len(indices)/2)]
+    # start_indices = [indices[2*i] for i in range(len(indices)/2)]
+    # end_indices   = [indices[2*i+1] for i in range(len(indices)/2)]
     
-    window = y[start_indices[0]: end_indices[0]]
-
-    return window
+    # window = y[start_indices[0]: end_indices[0]]
+    # # import pdb; pdb.set_trace()
+    max_index = np.argmax(y)
+    return max_index ,y
 
 
         
@@ -59,40 +60,95 @@ def gen(transcription_file, transcription=True):
                 print("1 :Ghe deteceted")
                 filenames = os.listdir(params.isolated_drums_dir + ge_dirs[0])
                 filepath = params.isolated_drums_dir + ge_dirs[0] + '/' +  filenames[0]
-                window = get_onset_time(filepath)
-                start = int(onset_times[i]*sample_rate - len(window)/2)
-                end = int(onset_times[i]*sample_rate + len(window)/2) + 1
-                output_wav[start:end] = window
+
+
+
+                max_index, window = get_onset_time(filepath)
+                                    
+                start = int(onset_times[i]*sample_rate - max_index)
+                end = int(len(window) - max_index + onset_times[i]*sample_rate)
+
+                if start < 0:
+                    start = 0
+                    start_index = int(max_index - onset_times[i]*sample_rate)
+                    window = window[start_index:]
+
+                if end > length:
+                    end = length
+                    end_index = int( (len(window) - max_index ) - (length - onset_times[i]))
+                    window = window[0: len(window) - end_index]
+
+                print(len(window), end-start)
+                # import pdb; pdb.set_trace()
+                window = window[0: end-start]
+                # print(end, start, end-start, len(window))
+                output_wav[start:end] = np.add(output_wav[start:end] ,window) 
+                # librosa.output.write_wav('output.wav', output_wav, params.sample_rate)
 
             if bol_seq[i].lower() == ke_dirs[0].lower():    
                 print("2 : Ke deteceted")
                 filenames = os.listdir(params.isolated_drums_dir + ke_dirs[0])
                 filepath = params.isolated_drums_dir + ke_dirs[0] + '/' +  filenames[0]
-                window = get_onset_time(filepath)
-                start = int(onset_times[i]*sample_rate - len(window)/2)
-                end = int(onset_times[i]*sample_rate + len(window)/2) + 1
-                output_wav[start:end] = window            
+
+
+                max_index, window = get_onset_time(filepath)
+                                    
+                start = int(onset_times[i]*sample_rate - max_index)
+                end = int(len(window) - max_index + onset_times[i]*sample_rate)
+
+                if start < 0:                    
+                    start = 0
+                    start_index = int(max_index - onset_times[i]*sample_rate)
+                    window = window[start_index:]
+
+                if end > length:
+                    end = length
+                    end_index = int( (len(window) - max_index ) - (length - onset_times[i]))
+                    window = window[0: len(window) - end_index]
+
+                print(len(window), end-start)
+                # import pdb; pdb.set_trace()
+                window = window[0: end-start]
+                # print(end, start, end-start, len(window))
+                output_wav[start:end] = np.add(output_wav[start:end] ,window) 
+                # librosa.output.write_wav('output.wav', output_wav, params.sample_rate)
+
             
             else:
                 for unique_bol in unique_bols: 
                     if bol_seq[i].lower() in unique_bol.lower():
                         print("3: ", bol_seq[i].lower() + " deteceted")
                         filenames = os.listdir(params.isolated_drums_dir + unique_bol)
-                        filepath = params.isolated_drums_dir + unique_bol + '/' +  filenames[0]
-                        window = get_onset_time(filepath)
-                        start = int(onset_times[i]*sample_rate - len(window)/2)
-                        end = int(onset_times[i]*sample_rate + len(window)/2) 
-                        output_wav[start:end] = window[0:end-start]
+                        filepath = params.isolated_drums_dir + unique_bol + '/' +  filenames[-1]
+                        max_index, window = get_onset_time(filepath)
+                                            
+                        start = int(onset_times[i]*sample_rate - max_index)
+                        end = int(len(window) - max_index + onset_times[i]*sample_rate)
+
+                        if start < 0:
+                            start = 0
+                            start_index = int(max_index - onset_times[i]*sample_rate)
+                            window = window[start_index:]
+
+                        if end > length:
+                            end = length
+                            end_index = int( (len(window) - max_index ) - (length - onset_times[i]))
+                            window = window[0: len(window) - end_index]
+
+                        print(len(window), end-start)
+                        window = window[0: end-start]
+                        output_wav[start:end] = np.add(output_wav[start:end] ,window) 
+                        # librosa.output.write_wav('output.wav', output_wav, params.sample_rate)
+
 
     return output_wav        
 
                 
             
 
-transcription_file = params.onset_bol_dir + 'ajr_10_ajr.csv'
+transcription_file = params.onset_bol_dir + 'ben_21.csv'    
 output_wav = gen(transcription_file, transcription=True)
 librosa.output.write_wav('output.wav', output_wav, params.sample_rate)
 
 # filepath = params.isolated_drums_dir + '/Da/' + 'Da_1_l_1.wav' 
 # get_onset_time(filepath)
-
