@@ -31,6 +31,12 @@ def read_score_file(filepath):
             if element == ';':
                 beats.append(val)
                 val = []
+
+    for i in range(len(beats)):
+        beats[i] = ''.join(beats[i]).strip()
+        beats[i] = ''.join(beats[i]).split(' ')
+    
+
     return beats
 
 
@@ -126,51 +132,44 @@ def gen(transcription_file, score_file, bpm, transcription=False, scores=True):
 
     if scores:
         beats = read_score_file(score_filepath)            
-        get_time_intervals(bpm, beats)
+        
+        samples_per_beat = int((bpm/60.0)*sample_rate)
+        num_beats = len(beats)
+        audio_length = num_beats*samples_per_beat
+        output_wav = np.zeros(audio_length)
 
 
-def get_time_intervals(bpm, beats):
-    bols = []
-    time_intervals = []
-    
-    time_per_beat = (bpm/60.0)*sample_rate
-    
-    segment_by_space = []
-    space = ' '
-    for i in range(len(beats)):
-        val_1 = []
-        val = []
-        for element in beats[i]:
-            val.append(element)
-            if space == element:
-                val_1.append(val)
-                val = []
-        segment_by_space.append(val_1)
-        val_1 = []
-    # for i in range(len(segment_by_space)): 
-    #     segment_by_space[i] = ''.join(segment_by_space[i]).strip()
-    for i in segment_by_space:
-        print i
+        for i in range(num_beats):
+            samples_per_elem = samples_per_beat/len(beats[i])
 
-    import pdb; pdb.set_trace()            
+            onset_times = []
+            time = 0
+            for elem in beats[i]:
+                elem = elem.split(',')
+                if len(elem) == 1:
+                    onset_times.append(time)
+                    time = time + samples_per_beat/len(beats[i])
+                if len(elem) == 2:    
+                    for e in elem:
+                        onset_times.append(time)
+                        time = time + samples_per_beat/(len(beats[i])*2)
 
+            import pdb; pdb.set_trace()
+            
 
 
 
 # transcription_file = params.onset_bol_dir + 'dli_3.csv'    
 transcription_file = params.onset_bol_dir_ste + 'dli_3.txt'
 
-score_file = []
-bpm = []
-output_wav = gen(transcription_file, score_file, bpm, transcription=True, scores=False)
-librosa.output.write_wav('output.wav', output_wav, params.sample_rate)
+# score_file = []
+# bpm = []
+# output_wav = gen(transcription_file, score_file, bpm, transcription=True, scores=False)
+# librosa.output.write_wav('output.wav', output_wav, params.sample_rate)
 
-# score_dir = params.score_dir
-# score_files = os.listdir(score_dir)
-# score_filepath = score_dir + '/' + score_files[0]
-# bpm = 100
-# # gen(transcription_file, transcription=False, scores=True, score_filepath, bpm)
-# gen(transcription_file, score_filepath, bpm, transcription=False, scores=True)
-
-# filepath = params.isolated_drums_dir + '/Da/' + 'Da_1_l_1.wav' 
-# get_onset_time(filepath)
+score_dir = params.score_dir
+score_files = os.listdir(score_dir)
+score_filepath = score_dir + '/' + score_files[0]
+bpm = 100
+# gen(transcription_file, transcription=False, scores=True, score_filepath, bpm)
+gen(transcription_file, score_filepath, bpm, transcription=False, scores=True)
