@@ -1,7 +1,8 @@
 isolated_drums_dir = '../datasets/tabla/isolated/'
 onset_bol_dir = '../datasets/tabla/onsNoMap/'
+onset_bol_dir_ste = '../datasets/tabla/onsNoMap_ste/'
 energy_threshold = 0.1
-
+score_dir = '../datasets/tabla/scores'
 sample_rate = 44100
 unique_bols = [ 'Da', 'Dha', 'Dhere', 'Dhi', 'Dhin', 'Dhit', 'Din', 'Kda', 'Na', 'Re', 
                     'Ta', 'Tak', 'Te', 'Tere', 'Ti', 'Tin', 'Tit', 'Traka', 'Trkt', 'Tun']
