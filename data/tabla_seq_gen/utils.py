@@ -181,7 +181,7 @@ def gen_from_transp(transcription_file):
     return output_wav
 
 
-def gen_random_seq(score_filepath, bpm, length, onset_times, bol_seq):            
+def gen_random_seq(output_wav, bpm, length, onset_times, bol_seq):            
 
     for i in range(len(bol_seq)):
         if bol_seq[i].lower() == ge_dirs[0].lower():
@@ -236,25 +236,82 @@ def gen_random_seq(score_filepath, bpm, length, onset_times, bol_seq):
 
 
 
-def strategy_1(filepath_1, filepath_2):
 
-    beats_1 = read_score_file(filepath_1)
-    beats_2 = read_score_file(filepath_2)
+'''
+strategy 1: Available files with varying BPM: filename code: score_filename + strat_1 +  bpm + .wav
+strategy 2: Mixing up two score_files: filename code: score_filename1 + score_filename2 + strat_2 + bpm + .wav
+'''
+
+def write_trans_file(bol_seq, onset_times, filepath):
+    columns = ['bols', 'onsTime']
+    dataframe = pd.DataFrame(columns=columns)
+    dataframe[columns[0]] = bol_seq
+    dataframe[columns[1]] = onset_times
+
+    dataframe.to_csv(filepath)
+
+
+def strategy_1(bpm):
+
+    sample_rate = params.sample_rate
+    score_dir = params.score_dir
+    score_files = os.listdir(score_dir)
+    
+    for file in score_files:
+        file = score_dir + file
+        filename = file.split('/')[-1]
+        print('Generating tabla sequence for ', filename)
+
+        beats = read_score_file(file)
+        num_beats = len(beats)
+        samples_per_beat = int((bpm/60.0)*sample_rate)
+        length = num_beats*samples_per_beat + 100000
+        output_wav = np.zeros(length)
+        onset_times, strokes = get_times_strokes(beats, bpm)
+        bol_seq = refine_strokes(strokes)        
+
+        output_wav = gen_random_seq(output_wav, bpm, length, onset_times, bol_seq)
+        import pdb; pdb.set_trace()
+        store_path = params.train_data_wav + filename.split('.')[0] + '_strat_1_' + str(bpm) + '.wav'
+        librosa.output.write_wav(store_path, output_wav, sample_rate)
+        trans_filepath = params.train_data_trans + filename.split('.')[0] + '_strat_1_' + str(bpm) + '.csv'
+        write_trans_file(bol_seq, onset_times, trans_filepath)
+        
+        print("Stored the wav file at ", store_path, ' and labels at ', trans_filepath)
+
+
+
+def strategy_2(bpm, filepath_1, filepath_2):
+
+    beats_1 = read_score_file(params.score_dir + filepath_1)
+    beats_2 = read_score_file(params.score_dir + filepath_2)
 
     beats = []
-    for i in range(min(len(beats_1, beats_2))):
+    for i in range(min(len(beats_1), len(beats_2))):
         if i%2 == 0:
             beats.append(beats_1[i])
         if i%2 == 1:
             beats.append(beats_2[i])
 
-
+    beats = beats_1        
     num_beats = len(beats)
     samples_per_beat = int((bpm/60.0)*sample_rate)
 
-    length = num_beats*samples_per_beat + 50000
+    length = num_beats*samples_per_beat + 100000
     output_wav = np.zeros(length)
     onset_times, strokes = get_times_strokes(beats, bpm)
     bol_seq = refine_strokes(strokes)
-    gen_random_seq(score_filepath, bpm, length, onset_times, bol_seq)
+    
+    output_wav = gen_random_seq(output_wav, bpm, length, onset_times, bol_seq)
+    import pdb; pdb.set_trace()
 
+    filename_1 = filepath_1.split('/')[-1]
+    filename_2 = filepath_2.split('/')[-1]
+    store_path = params.train_data_wav + filename_1.split('.')[0] + '_' + filename_2.split('.')[0] + '_strat_2_' + str(bpm) + '.wav'
+
+    librosa.output.write_wav(store_path, output_wav, sample_rate)
+    
+    trans_filepath = params.train_data_trans + filename_1.split('.')[0] + '_' + filename_2.split('.')[0] + '_strat_2_' + str(bpm) + '.csv'
+    write_trans_file(bol_seq, onset_times, trans_filepath)
+    
+    print("Stored the wav file at ", store_path, ' and labels at ', trans_filepath)

@@ -5,6 +5,9 @@ score_dir = '../datasets/tabla/scores/'
 source_sep_data = '../datasets/tabla/source_sep/'
 train_data = '../datasets/tabla/train_data/'
 
+train_data_wav = '../datasets/tabla/train_data/wav/'
+train_data_trans = '../datasets/tabla/train_data/trans/'
+
 energy_threshold = 0.1
 sample_rate = 44100
 

@@ -28,26 +28,28 @@ def gen_source_sep_data():
         print("Stored the wav file at ", store_path)
 
 
-
 def gen_train_data(bpm = 70):
     transcription_file = []
     score_dir = params.score_dir
     score_files = os.listdir(score_dir)
 
-    if not os.path.exists(params.train_data):
-        os.makedirs(params.train_data)
+    train_data_wav = params.train_data_wav
+    train_data_trans = params.train_data_trans
+
+    if not os.path.exists(train_data_wav):
+        os.makedirs(train_data_wav)
+
+    if not os.path.exists(train_data_trans):
+        os.makedirs(train_data_trans)
 
 
-    for file in score_files:
-        file = score_dir + file
-        filename = file.split('/')[-1]
-        print('Generating tabla sequence for ', filename)
-    
-        output_wav = utils.gen_random_seq(file, bpm)
-        
-        store_path = params.train_data + filename.split('.')[0] + '.wav'
-        librosa.output.write_wav(store_path, output_wav, params.sample_rate)
-        print("Stored the wav file at ", store_path)
+    utils.strategy_1(bpm)
+
+    for i in range(len(score_files)):
+        for j in range(len(score_files)):
+            if i != j:
+                print(score_files[i], score_files[j])
+                utils.strategy_2(bpm, score_files[i], score_files[j])
 
 
 # gen_source_sep_data()
