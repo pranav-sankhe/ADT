@@ -28,6 +28,11 @@ def wav_to_mel(y):
   mel = mel.T
   return mel
 
+def read_audiofile(filepath):
+  y, sr = librosa.load(filepath, sr=None)
+  mel = wav_to_mel(y)
+  return mel
+
 def read_anottFile(filepath):
   data = pd.read_csv(filepath, header=None)
   onset_times = data[2][1:].values
@@ -143,21 +148,21 @@ def store_as_npy():
   # anott_files = os.listdir(train_anott_dir)
   # anott_files = np.sort(anott_files)
 
-  if not os.path.exists(params.np_train_files_dir):
-    os.makedirs(params.np_train_files_dir)
+  if not os.path.exists(params.train_data_dir):
+    os.makedirs(params.train_data_dir)
 
-  if not os.path.exists(params.np_spec_dir):
-    os.makedirs(params.np_spec_dir)
+  if not os.path.exists(params.train_spec_dir):
+    os.makedirs(params.train_spec_dir)
 
-  if not os.path.exists(params.np_onset_dir):
-    os.makedirs(params.np_onset_dir)
+  if not os.path.exists(params.train_onset_dir):
+    os.makedirs(params.train_onset_dir)
 
-  if not os.path.exists(params.np_bols_dir):
-    os.makedirs(params.np_bols_dir)
+  if not os.path.exists(params.train_bols_dir):
+    os.makedirs(params.train_bols_dir)
 
-  np_spec_dir = params.np_spec_dir
-  np_onset_dir = params.np_onset_dir
-  np_bols_dir = params.np_bols_dir
+  train_spec_dir = params.train_spec_dir
+  train_onset_dir = params.train_onset_dir
+  train_bols_dir = params.train_bols_dir
 
 
   for filename in filenames:
@@ -166,8 +171,58 @@ def store_as_npy():
     num_splits = len(specs)
 
     for i in range(num_splits):
-      np.save( np_spec_dir + filename + '_split' + str(i), specs[i])
-      np.save( np_onset_dir + filename + '_split' + str(i), onset_labels[i])
-      np.save( np_bols_dir + filename + '_split' + str(i), bol_labels[i])
+      np.save( train_spec_dir + filename + '_split' + str(i), specs[i])
+      np.save( train_onset_dir + filename + '_split' + str(i), onset_labels[i])
+      np.save( train_bols_dir + filename + '_split' + str(i), bol_labels[i])
 
-store_as_npy()
+
+
+def provide_batch(step):
+  spec_files = os.listdir(params.train_spec_dir)
+  onset_files = os.listdir(params.train_onset_dir)
+  bols_files = os.listdir(params.train_bols_dir)
+  batch_size = params.batch_size
+  # Ensure that the files are npy files
+  
+    
+
+  # spec_files = spec_files[spec_files.split('.')[-1] == 'npy']
+  # spec_files = spec_files[spec_files.split('.')[-1] == 'npy']
+  # spec_files = spec_files[spec_files.split('.')[-1] == 'npy']
+
+  batch_files = spec_files[step*batch_size: step*batch_size + batch_size]
+  
+  batch_filenames = []
+  for file in batch_files:
+    filename = file.split('.')[0]
+    batch_filenames.append(filename)
+
+  spec_list = []
+  for file in batch_files:
+    filepath = params.train_spec_dir + file
+    mel = np.load(filepath)
+    spec_list.append(mel)
+  spec_list = np.array(spec_list)
+
+  onset_list = []
+  for file in batch_files:
+    filepath = params.train_onset_dir + file
+    onset_times= np.load(filepath)
+    onset_list.append(onset_times)
+
+  bols_list = []  
+  for file in batch_files:
+    filepath = params.train_bols_dir + file
+    bols = np.load(filepath)
+    bols_list.append(bols)
+
+
+  # import pdb; pdb.set_trace()
+  spec_list = np.array(spec_list)
+  onset_list = np.array(onset_list)
+  bols_list = np.array(bols_list)
+  return spec_list, onset_list, bols_list
+
+
+# spec_list, onset_list, bols_list = provide_batch(0)
+# store_as_npy()

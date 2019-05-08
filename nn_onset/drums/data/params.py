@@ -6,6 +6,16 @@ n_fft = 2048
 num_bols = 19
 batch_size = 8
 bols = ['Da', 'Ke', 'Ge', 'Ta', 'Ti', 'Na', 'Din', 'Kda', 'Tit', 'Dha', 'Dhere', 'Dhit', 'Dhi', 'Dhin', 'Dhin', 'Re', 'Te', 'Tun', 'Tin', 'Traka']
+
+train_data_dir = '../../../data/datasets/tabla/np_dir/'
+train_spec_dir = train_data_dir + 'spec/'
+train_onset_dir = train_data_dir + 'onset/'
+train_bols_dir = train_data_dir + 'bols/'
+
+train_wav_dir = '../../../data/datasets/tabla/train_data/wav/'
+train_anott_dir = '../../../data/datasets/tabla/train_data/trans/'
+
+
 # [('activation_loss', False)
 # , ('batch_size', 8)
 # , ('clip_norm', 3)
