@@ -1,1 +1,0 @@
-n T 4 4 T 3 1 T C T 3 1 T 3 1 T C T 3 1 t 3

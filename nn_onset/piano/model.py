@@ -219,20 +219,20 @@ def get_model(transcription_data, hparams, is_training=True):
 
   # Creates a pianoroll labels in red and probs in green [minibatch, 88]
   images = {}
-  onset_pianorolls = tf.concat(
+  onset_drumrolls = tf.concat(
       [
           onset_labels[:, :, :, tf.newaxis], onset_probs[:, :, :, tf.newaxis],
           tf.zeros(tf.shape(onset_labels))[:, :, :, tf.newaxis]
       ],
       axis=3)
-  images['OnsetPianorolls'] = onset_pianorolls
-  activation_pianorolls = tf.concat(
+  images['Onset_Drumrolls'] = onset_drumrolls
+  activation_drumrolls = tf.concat(
       [
           frame_labels[:, :, :, tf.newaxis], frame_probs[:, :, :, tf.newaxis],
           tf.zeros(tf.shape(frame_labels))[:, :, :, tf.newaxis]
       ],
       axis=3)
-  images['ActivationPianorolls'] = activation_pianorolls
+  images['ActivationDrumrolls'] = activation_drumrolls
 
   return (tf.losses.get_total_loss(), losses, frame_labels_flat,
           predictions_flat, images)

@@ -1,1 +1,0 @@
-D , N D , N { dg , D , ng , D , D , N , dg , D , ng , D , D , N , dg , D , ng , D , D , N , }
