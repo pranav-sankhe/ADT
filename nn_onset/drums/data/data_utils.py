@@ -167,7 +167,6 @@ def store_as_npy():
       np.save( train_bols_dir + filename + '_split' + str(i), bol_labels[i])
 
 
-
 def provide_batch(step):
   spec_files = os.listdir(params.train_spec_dir)
   onset_files = os.listdir(params.train_onset_dir)
@@ -215,4 +214,3 @@ def provide_batch(step):
   # import pdb; pdb.set_trace()
   return spec_list, onset_list, bols_list
 
-# store_as_npy()

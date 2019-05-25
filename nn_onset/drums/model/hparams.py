@@ -21,8 +21,11 @@ decay_rate=0.98
 
 num_iterations = 1000
 
+batch_size = 8
+
 bols = ['DA', 'KI', 'GE', 'TA', 'NA', 'DIN', 'KDA', 'TIT', 'DHA', 'DHE', 'DHET', 'DHI', 'DHIN', 'RE', 'TE', 'TII', 'TIN', 'TRA']
 num_bols = len(bols)
+
 
 
 log_dir = './train'

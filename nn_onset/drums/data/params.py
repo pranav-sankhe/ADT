@@ -4,6 +4,7 @@ spec_fmin = 0
 spec_n_bins = 229
 n_fft = 2048
 batch_size = 8
+
 bols = ['DA', 'KI', 'GE', 'TA', 'NA', 'DIN', 'KDA', 'TIT', 'DHA', 'DHE', 'DHET', 'DHI', 'DHIN', 'RE', 'TE', 'TII', 'TIN', 'TRA']
 num_bols = len(bols)
 

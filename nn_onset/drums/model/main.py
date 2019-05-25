@@ -8,6 +8,10 @@ import tensorflow as tf
 import utils
 import hparams
 import sys 
+import hparams
+
+
+import sys
 sys.path.insert(0, '../data')
 import data_utils
   
@@ -49,7 +53,7 @@ def train():
   lengths = lengths.astype(np.int32)
   
   loss, losses, unused_labels, unused_predictions, images = utils.get_model(spec, onset_labels, frame_labels, lengths)
-
+  import pdb; pdb.set_trace()
   tf.summary.scalar('loss', loss)
   for label, loss_collection in losses.iteritems():
     loss_label = 'losses/' + label
@@ -68,6 +72,18 @@ def train():
   
   optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
 
+  global_step = tf.train.get_or_create_global_step()
+  
+  learning_rate = tf.train.exponential_decay(
+      hparams.learning_rate,
+      global_step,
+      hparams.decay_steps,
+      hparams.decay_rate,
+      staircase=True)
+    
+  tf.summary.scalar('learning_rate', learning_rate)
+  
+  optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
 
   with tf.name_scope("compute_gradients"):
     # compute_gradients` returns a list of (gradient, variable) pairs
@@ -95,7 +111,7 @@ def train():
 
 
   with tf.variable_scope(tf.get_variable_scope(), initializer=initializer):
-    # with tf.variable_scope(tf.get_variable_scope(), initializer=initializer):
+    
     init = tf.global_variables_initializer()
     sess.run(init)
     merged = tf.summary.merge_all()
@@ -120,7 +136,6 @@ def train():
             }
         ) 
         train_writer.add_summary(summary, i)
-
         print (np.sum(loss_val)/np.size(loss_val))
 
   # logging_dict = {'global_step': tf.train.get_global_step(), 'loss': loss}
