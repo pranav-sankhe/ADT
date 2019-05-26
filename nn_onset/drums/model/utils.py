@@ -109,7 +109,78 @@ def conv_net_kelz(inputs):
     
     return net
 
+def f1_score(precision, recall):
+  """Creates an op for calculating the F1 score.
 
+  Args:
+    precision: A tensor representing precision.
+    recall: A tensor representing recall.
+
+  Returns:
+    A tensor with the result of the F1 calculation.
+  """
+  return tf.where(
+      tf.greater(precision + recall, 0), 2 * (
+          (precision * recall) / (precision + recall)), 0)
+
+def accuracy_without_true_negatives(true_positives, false_positives,
+                                    false_negatives):
+  """Creates an op for calculating accuracy without true negatives.
+
+  Args:
+    true_positives: A tensor representing true_positives.
+    false_positives: A tensor representing false_positives.
+    false_negatives: A tensor representing false_negatives.
+
+  Returns:
+    A tensor with the result of the calculation.
+  """
+  return tf.where(
+      tf.greater(true_positives + false_positives + false_negatives, 0),
+      true_positives / (true_positives + false_positives + false_negatives), 0)
+
+
+def frame_metrics(frame_labels, frame_predictions):
+  """Calculate frame-based metrics."""
+  frame_labels_bool = tf.cast(frame_labels, tf.bool)
+  frame_predictions_bool = tf.cast(frame_predictions, tf.bool)
+
+  frame_true_positives = tf.reduce_sum(tf.to_float(tf.logical_and(
+      tf.equal(frame_labels_bool, True),
+      tf.equal(frame_predictions_bool, True))))
+  frame_false_positives = tf.reduce_sum(tf.to_float(tf.logical_and(
+      tf.equal(frame_labels_bool, False),
+      tf.equal(frame_predictions_bool, True))))
+  frame_false_negatives = tf.reduce_sum(tf.to_float(tf.logical_and(
+      tf.equal(frame_labels_bool, True),
+      tf.equal(frame_predictions_bool, False))))
+  frame_accuracy = tf.reduce_mean(tf.to_float(
+      tf.equal(frame_labels_bool, frame_predictions_bool)))
+
+  frame_precision = tf.where(
+      tf.greater(frame_true_positives + frame_false_positives, 0),
+      tf.div(frame_true_positives,
+             frame_true_positives + frame_false_positives),
+      0)
+  frame_recall = tf.where(
+      tf.greater(frame_true_positives + frame_false_negatives, 0),
+      tf.div(frame_true_positives,
+             frame_true_positives + frame_false_negatives),
+      0)
+  frame_f1_score = f1_score(frame_precision, frame_recall)
+  frame_accuracy_without_true_negatives = accuracy_without_true_negatives(
+      frame_true_positives, frame_false_positives, frame_false_negatives)
+
+  return {
+      'true_positives': frame_true_positives,
+      'false_positives': frame_false_positives,
+      'false_negatives': frame_false_negatives,
+      'accuracy': frame_accuracy,
+      'accuracy_without_true_negatives': frame_accuracy_without_true_negatives,
+      'precision': frame_precision,
+      'recall': frame_recall,
+      'f1_score': frame_f1_score,
+  }
 
 def acoustic_model(inputs, hparams, lstm_units, lengths):
   """Acoustic model that handles all specs for a sequence in one window."""
@@ -270,6 +341,7 @@ def get_model(spec, onset_labels, frame_labels, lengths):
       
       onset_probs_flat = flatten_maybe_padded_sequences(onset_probs, lengths)
       onset_labels_flat = flatten_maybe_padded_sequences(onset_labels, lengths)
+
       tf.identity(onset_probs_flat, name='onset_probs_flat')
       tf.identity(onset_labels_flat, name='onset_labels_flat')
       tf.identity(
@@ -371,7 +443,7 @@ def get_model(spec, onset_labels, frame_labels, lengths):
       tf.losses.add_loss(tf.reduce_mean(activation_losses))
       losses['activation'] = activation_losses
 
-  predictions_flat = tf.cast(tf.greater_equal(frame_probs_flat, .5), tf.float32)
+  predictions_flat = tf.cast(tf.greater_equal(frame_probs_flat, .1), tf.float32)
 
   # Creates a pianoroll labels in red and probs in green [minibatch, 88]
   images = {}
@@ -389,7 +461,7 @@ def get_model(spec, onset_labels, frame_labels, lengths):
       ],
       axis=3)
   images['ActivationDrumrolls'] = activation_drumrolls
-
+  
   return (tf.losses.get_total_loss(), losses, frame_labels_flat,
           predictions_flat, images)
 

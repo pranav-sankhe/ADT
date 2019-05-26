@@ -5,7 +5,7 @@ spec_n_bins = 229
 n_fft = 2048
 batch_size = 8
 
-bols = ['DA', 'KI', 'GE', 'TA', 'NA', 'DIN', 'KDA', 'TIT', 'DHA', 'DHE', 'DHET', 'DHI', 'DHIN', 'RE', 'TE', 'TII', 'TIN', 'TRA']
+bols =['Da', 'Ke', 'Ge', 'Ta ','Ti', 'Na', 'Din', 'Kda', 'Tit', 'Dha', 'Dhere', 'Dhit', 'Dhi', 'Dhin', 'Re', 'Te', 'Tun', 'Tin', 'Traka']
 num_bols = len(bols)
 
 train_data_dir = '../../../data/datasets/tabla/np_dir/'
@@ -49,4 +49,3 @@ train_anott_dir = '../../../data/datasets/tabla/train_data/trans/'
 # , ('velocity_lstm_units', 0)
 # , ('weight_frame_and_activation_loss', True)
 # ])
-

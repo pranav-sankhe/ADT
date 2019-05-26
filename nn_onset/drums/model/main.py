@@ -9,7 +9,7 @@ import utils
 import hparams
 import sys 
 import hparams
-
+import mir_eval
 
 import sys
 sys.path.insert(0, '../data')
@@ -53,7 +53,19 @@ def train():
   lengths = lengths.astype(np.int32)
   
   loss, losses, unused_labels, unused_predictions, images = utils.get_model(spec, onset_labels, frame_labels, lengths)
-  import pdb; pdb.set_trace()
+  metrics = utils.frame_metrics(unused_labels, unused_predictions)
+  
+  # f_measure = np.zeros(hparams.num_bols)
+  # import pdb; pdb.set_trace()
+  # for i in range(hparams.num_bols):
+  #   f_measure[i] = mir_eval.beat.f_measure(unused_labels[i], unused_predictions[i])
+
+  for name, image in images.iteritems():
+    tf.summary.image(name, image)
+
+  for key in metrics.keys():
+    tf.summary.scalar(key, metrics[key])
+  # import pdb; pdb.set_trace()
   tf.summary.scalar('loss', loss)
   for label, loss_collection in losses.iteritems():
     loss_label = 'losses/' + label
@@ -127,16 +139,20 @@ def train():
         print ("Training:: Epoch ", i)
         spec_list, onset_list, bols_list = data_utils.provide_batch(i)
 
-        _, loss_val, summary = sess.run(
-            [apply_gradient_op, loss, merged],
+        _, loss_val, summary, labels, preds= sess.run(
+            [apply_gradient_op, loss, merged, unused_labels, unused_predictions],
             feed_dict={
                 spec: spec_list, 
                 onset_labels: onset_list,
                 frame_labels: bols_list
             }
         ) 
+        
         train_writer.add_summary(summary, i)
-        print (np.sum(loss_val)/np.size(loss_val))
+        
+        
+
+
 
   # logging_dict = {'global_step': tf.train.get_global_step(), 'loss': loss}
 

@@ -23,7 +23,7 @@ num_iterations = 1000
 
 batch_size = 8
 
-bols = ['DA', 'KI', 'GE', 'TA', 'NA', 'DIN', 'KDA', 'TIT', 'DHA', 'DHE', 'DHET', 'DHI', 'DHIN', 'RE', 'TE', 'TII', 'TIN', 'TRA']
+bols =['Da', 'Ke', 'Ge', 'Ta ','Ti', 'Na', 'Din', 'Kda', 'Tit', 'Dha', 'Dhere', 'Dhit', 'Dhi', 'Dhin', 'Re', 'Te', 'Tun', 'Tin', 'Traka']
 num_bols = len(bols)
 
 

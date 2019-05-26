@@ -38,7 +38,6 @@ def read_anottFile(filepath):
   onset_times = data[2][1:].values
   onset_times = onset_times.astype(int)
   bols = data[1][1:].values
-  
   bad_indices = []  
   for i in range(len(bols)):
     if bols[i] not in params.bols:
@@ -89,12 +88,12 @@ def split(filename, unit_length):
 
   output = np.split(y, num_splits)
   specs = []
-  print("--------------------------------------------------")
-  print("Computing Spectrograms...")
-  print("--------------------------------------------------")
-  for i in range(num_splits): # Dealing with one part at a time
-    specs.append(wav_to_mel(output[i]))
-    print("computed spectrogram for split " + str(i))
+  # print("--------------------------------------------------")
+  # print("Computing Spectrograms...")
+  # print("--------------------------------------------------")
+  # for i in range(num_splits): # Dealing with one part at a time
+  #   specs.append(wav_to_mel(output[i]))
+  #   print("computed spectrogram for split " + str(i))
 
   # frames_per_second = params.sample_rate / params.spec_hop_length
   # num_frames = np.int32((split_length/params.sample_rate) * frames_per_second)
@@ -116,13 +115,18 @@ def split(filename, unit_length):
   print("--------------------------------------------------")
   
   for i in range(len(onset_times)):
-    split_index = onset_time//split_length
-    onset_index = onset_time - split_length*split_index
+    split_index = onset_times[i]//split_length
+    onset_index = onset_times[i] - split_length*split_index
     idx = np.abs(t - onset_index).argmin()
+    window_size = 100
+    start_idx = idx - window_size//2
+    end_idx = idx + window_size//2
+    if start_idx < 0: start_idx = 0
+    # if end_idx > params.sample_rate*
     
-    onset_labels[split_index, idx, bol_to_int(bols[i])] = 1    
-    bol_labels[split_index, idx, bol_to_int(bols[i])] = bol_to_int(bols[i])
-
+    onset_labels[split_index, start_idx:end_idx, bol_to_int(bols[i])] = 1
+    bol_labels[split_index, start_idx:end_idx, bol_to_int(bols[i])] = 1
+  
   return specs, onset_labels, bol_labels
 
 
@@ -158,12 +162,14 @@ def store_as_npy():
 
   for filename in filenames:
     specs, onset_labels, bol_labels = split(filename, unit_length=20)
-  
-    num_splits = len(specs)
-
+    
+    num_splits = len(onset_labels)
+    # import pdb; pdb.set_trace()
     for i in range(num_splits):
-      np.save( train_spec_dir + filename + '_split' + str(i), specs[i])
+      # np.save( train_spec_dir + filename + '_split' + str(i), specs[i])
+      print('File Saved: ', train_onset_dir + filename + '_split' + str(i))
       np.save( train_onset_dir + filename + '_split' + str(i), onset_labels[i])
+      print('File Saved: ', train_bols_dir + filename + '_split' + str(i))
       np.save( train_bols_dir + filename + '_split' + str(i), bol_labels[i])
 
 
@@ -214,3 +220,4 @@ def provide_batch(step):
   # import pdb; pdb.set_trace()
   return spec_list, onset_list, bols_list
 
+store_as_npy()
