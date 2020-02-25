@@ -1,0 +1,10 @@
+\frametitle{Discussion}
+\begin{itemize}
+\item The results show that near perfect transcription has been achieved.
+\item The reason for such high accuracy is that the dataset over which the model has been trained is less complex.
+\item Also relatively, transcribing percussion instruments is easy because of the less variability in sound
+\item We can possibily achieve better results by combining an acoustic model with a language model
+\item Another direction is to go beyond traditional spectrogram representations of audio signals
+\item The inference is being carried out after splitting the audio files because the placeholders for data have been hardcoded with the variable shape. This can be undone because TensorFlow allows unspecified variable size
+\item Converting the transcriptions to drum recordings to analyse the perception quality of the transcriptions.
+\end{itemize}

@@ -4,17 +4,22 @@
           bullet=circle,% Use circles instead of squares for bullets.
           titleline=true,% Show a line below the frame title.
           alternativetitlepage=true,% Use the fancy title page.
-          titlepagelogo=logo-polito,% Logo for the first page.
-          watermark=watermark-polito,% Watermark used in every page.
+          titlepagelogo=logo,% Logo for the first page.
+          % watermark=watermark-polito,% Watermark used in every page.
           watermarkheight=100px,% Height of the watermark.
           watermarkheightmult=4,% The watermark image is 4 times bigger
                                 % than watermarkheight.
           ]{Torino}
 
-\author{Marco Barisione}
-\title{Torino, a pretty theme for \LaTeX{} Beamer}
-\institute{Politecnico di Torino}
-\date{September 18, 2007}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+ 
+\usepackage{lmodern}
+
+\author{Pranav Sankhe}
+\title{Transcription of Percussion Instruments}
+\institute{ \textbf{Supervisor} : Preeti Rao \\ Indian Institute of Technology, Bombay}
+\date{\today}
 
 \begin{document}
 \include{content}

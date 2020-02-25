@@ -12,6 +12,7 @@ import params
 import wave
 import six
 import pandas as pd
+
 def wav_to_mel(y):
   """Transforms the contents of a wav file into a series of mel spec frames."""
   # y = librosa.util.normalize(librosa.core.load(filepath, sr=params.sample_rate)[0])

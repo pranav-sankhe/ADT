@@ -1,0 +1,337 @@
+% DO NOT COMPILE THIS FILE DIRECTLY!
+% This is included by the other .tex files.
+
+\begin{frame}[t,plain]
+\titlepage
+\end{frame}
+
+\begin{frame}[t]{\textcolor{blue}{\textbf{TASK DESCRIPTION}}}
+
+\begin{itemize}
+\item \textbf{Drums}
+  \begin{itemize}  
+  \item Detection and classification of drum events
+  \item Estimating the onset and the offset timings of the classified drum events
+  \item Transcription of drum notes in the presence of polyphonic music
+  \end{itemize}
+
+
+\item \textbf{Tabla}
+  \begin{itemize}
+  \item Detection and classification of tabla events
+  \item Estimating the onset and the offset timings of the classified tabla events
+  \item Transcription of tabla notes in the presence of polyphonic music
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[t,fragile]{\textbf{Particularities \& Challenges }}
+\begin{itemize}
+\item Transient-like sound components exhibiting broadband spectra
+\item Locally periodic
+\item Sounds are superimposed
+\item High variability within a single tabla
+\item Special playing techniques introduce variety in the spectrum
+\item Interference of multiple instruments
+\item Insufficient real world datasets
+\end{itemize}
+\end{frame}
+
+\begin{frame}[t,fragile]{\textbf{Design patterns of a transcription system}}
+\begin{itemize}
+\item Feature Representation
+\begin{itemize}
+\item Natural Choice: Time and Frequency Representation :- \textbf{Spectrograms}
+\item Includes pre-processing steps intended to emphasize the target signal
+\begin{itemize}
+\item Band-pass filters with predefined center frequencies and bandwidths
+\item Harmonic-Percussive Source Separation
+\end{itemize}
+\end{itemize}
+\item Event Segmentation: Detect the temporal location of musical events in a continuous audio stream.
+\item Event Classification: Aims at associating the instrument type with the corresponding musical instrument
+\item Activation Function
+\begin{itemize}
+\item Maps feature representations into activation functions which indicated the activity level of drum instruments
+\item \textbf{Technique:} NMF, Probabilistic Latent Component Analysis, Deep Neural Networks
+\end{itemize}
+
+\end{itemize}
+\end{frame}
+
+% \begin{frame}[t,fragile]{Feature Representations}
+% \begin{itemize}
+% \item Natural Choice: Time and Frequency Representation :- \textbf{Spectrograms}
+% \item Includes pre-processing steps intended to emphasize the target drum signal
+% \begin{itemize}
+% \item Band-pass filters with predefined center frequencies and bandwidths
+% \item Harmonic-Percussive Source Separation
+% \end{itemize}
+% \end{itemize}
+% \end{frame}
+ 
+
+\begin{frame}[t,fragile]{ Activation Based Approach}
+Activation functions generates the activity of a specific instrument over time.
+\begin{itemize}
+\item \textbf{Matrix Factorization Algorithms}
+\begin{itemize}
+\item Matrix factorization algorithms aim at decomposing the spectrogram into basis functions and their corresponding activation functions
+\item Assumes that the target signal is a superposition of multiple, statistically independent sources. Problematic since the activations of different drums are usually rhythmically related.
+\end{itemize}
+
+\item \textbf{Deep Neural Networks}
+\begin{itemize}
+\item RNNs can in principle also perform sequence modeling, similar to the more classic methods such as HMM
+\item However, the lack of large amounts of training data and the applied training methods, prohibit RNN to perform well
+\end{itemize}
+\end{itemize}
+\end{frame} 
+
+\begin{frame}[t,fragile]{NMF-based Approach}
+\begin{itemize}
+\item Let $ X \epsilon R(K \times T) $  be the magnitude spectrogram
+\item We intend to decompose the mixture spectrogram $X$ into spectral basis functions $B(:,r)$ and corresponding time-varying gains $G(r, :)$
+\item Intuitively, speaking, the templates comprise the spectral content of the mixture’s constituent components, while the activations describe when and with which intensity they occur
+\item NMF typically starts with a suitable initialization of matrices $B$ and $G$. Subsequently, these matrices are iteratively updated to approximate $X$ with respect to a cost function $L$
+\item The detection of candidate onset events is typically approached by picking the peaks in the activation function $G (r, :)$
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[t,fragile]{Dataset used for NMF based approach}
+The dataset consists of 608 WAV files (44.1 kHz, Mono, 16bit). The approximate duration is 2:10 hours.
+Drums involved: Kick Drum, Snare Drum and Hi-Hat
+\begin{itemize}
+\item There are 104 polyphonic drum set recordings (drum loops)
+\item All the 104 polyphonic drum set recordings are annotated in time and the drum being played.
+\end{itemize}
+The recordings are from three different sources:
+\begin{itemize}
+\item Real-world, acoustic drum sets (RealDrum)
+\item Drum sample libraries (WaveDrum)
+\item Drum synthesizers (TechnoDrum)
+\end{itemize}
+\end{frame}
+
+\begin{frame}[t,fragile]{Method}
+
+\begin{itemize}
+\item \textbf{Obtaining the templates}
+  \begin{itemize}
+  \item Get the list of audio and the corresponding annotation files
+  \item Concatenate all the audio and the corresponding annotations in time
+  \item Considering the ground truth activations as the initialization of the activation matrix in NMF, we estimate the basis vectors i.e the templates for individual drums for each audio file
+  \item The templates are saved in the file-system as a numpy matrix
+  \end{itemize}
+
+\item \textbf{Predicting Activations}
+  \begin{itemize}
+    \item Load the saved templates
+    \item Compute the spectrogram of the test audio file
+    \item Considering the generated templates as the initialization of the basis matrix in NMF, we estimate the activations vectors i.e the activations for individual drums
+    \item Apply peak picking on the computed activations in order to select the prominent bursts
+  \end{itemize}
+
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[t,fragile]{Evaluation and Conclusions}
+We created the templates from the drum recordings produced by drum synthesizers and we evaluated our system on the real world drum recordings i.e. drum recordings played by an actual drum-set
+\begin{itemize}
+\item We used F-measure as our evaluation metric and we use the mir\_eval library to compute the metrics
+\item The F-measure we get is 0.659 and the reported F-measure in the literature using NMF on the IDMT-SMT dataset is around $0.7$
+\item In the current implementation the number of basis vectors assigned is one per drum. We can explore the possibility of assigning more than one basis vectors to a drum.
+\item Throughout the evaluation, we can observe that the Snare Drum(SD) in particular have many spurious activations of significant magnitude. Tampering with the computed template of SD can reduce the spurious activations like smoothening.
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[t,fragile]{DNN-based Approach}
+\begin{itemize}
+
+\item In contrast to the NMF-based systems, the mixture spectrogram X is processed as a time-series in a frame-wise fashion, i.e., we insert each individual spectral frame sequentially into a trained RNN.
+
+\item Basic RNN Model:- RNNs represent an extension of DNNs featuring additional recurrent connections within each layer which provide the single layers with the previous time step’s outputs as additional inputs
+
+\end{itemize}
+\end{frame}
+\begin{frame}[t,fragile]{DNN-based Approach}
+\begin{itemize}
+\item Bidirectional RNNs:- BRNN layers consist of two RNN sub-layers, one with recurrent connections in forward direction and the other in backward direction
+
+\item RNNs with Label Time Shifts:- Comparable results with Bidirectional RNNs can be achieved with RNNs using a label time-shift which allows an RNN to access information before and after the true start of drum sound events.
+
+\item LSTMs:- In addition to recurrent connections, LSTM cells feature an internal memory, which allows the network to learn long-term dependencies.
+
+\item GRUs:- Less parameters than LSTMs
+\end{itemize}
+\end{frame}
+
+\begin{frame}[t,fragile]{State of Art Drum Transcription Model}
+\begin{itemize}
+
+\item The authors evaluated and compared the performance of CNNs, RNNs and CRNNs
+\item CRNNs result in a model, in which the convolutional layers focus on acoustic modeling of the events, while the recurrent layers learn temporal structures of the features.
+\item They show that learning beats jointly with drums can be beneficial for the task of drum detection.
+
+\end{itemize}
+\tiny{\texttt{Image source: "Drum Transcription via Joint Beat And Drum Modeling Using Convolution Reccurent Neural Networks" by R. Vogl and Et. al}}
+\begin{figure}[h!]
+  \includegraphics[width=10cm, height=3cm]{crnn.png}
+  \caption{Model Architecture}
+  \label{}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}[t,fragile]{State of Art Drum Transcription Model}
+\begin{itemize}
+
+\item Feature Extraction
+  
+  \begin{itemize}
+    \item They use log magnitude spectrogram as an input
+    \item Window size = 46 milliseconds (2048 samples)
+    \item The frequency bins mel scaled
+    \item The positive first order differential over time of this spectrogram is calculated and concatenated.
+  \end{itemize}  
+
+\item Discussion
+  \begin{itemize}
+    \item CNN with a large enough spectral context (25 frames in this work) can detect drum events better than RNNs.
+    \item The results for CNNs and CRNNs show that convolutional feature processing is beneficial for drum detection.
+    \item The findings considering drum detection results for multi-task learning are also promising
+    \item The low results of beat and downbeat tracking are a limiting factor
+    \item As a next step, to better leverage multi-task learning effects, beat detection results must be improved
+  \end{itemize}  
+
+\end{itemize}
+
+\end{frame}
+
+
+\begin{frame}[t,fragile]{Magenta's Piano Transcription Model}
+\begin{itemize}
+\item The model is based on the premise that the frames containing an onset are more important than those who don't in terms of perception and hence transcription.
+
+\item This idea is manifested by training a dedicated note onset detector and using the raw output of that detector as additional input for the framewise note activation detector. 
+
+\item The input data representation used is mel-scaled spectrograms with log amplitude of the input raw audio with $229$ logarithmically-spaced frequency bins, a hop length of $512$, an FFT window of $2048$, and a sample rate of $16$kHz. 
+
+
+
+\end{itemize}
+\end{frame}
+\begin{frame}[t,fragile]{Model Architecture}
+\begin{figure}[h!]
+  \includegraphics[width=6cm, height=5cm]{piano_model}
+  \caption{Model Architecture}
+  \label{}
+\end{figure}
+\tiny{\texttt{Image source: https://arxiv.org/pdf/1710.11153.pdf}}
+% \end{itemize}
+\end{frame}
+
+
+\begin{frame}[t,fragile]{Magenta's Piano Transcription Model}
+\begin{itemize}
+
+\item \textbf{Model Description}
+  \begin{itemize}
+    \item The onset detector is composed of the acoustic model, followed by a bidirectional LSTM with $128$ units in both the forward and backward directions, followed by a fully connected sigmoid layer with $88$ outputs for representing the probability of an onset for each of the $88$ piano keys.
+
+    \item The frame activation detector is composed of a separate acoustic model, followed by a fully connected sigmoid layer with $88$ outputs. Its output is concatenated together with the output of the onset detector and followed by a bidirectional LSTM with $128$ units in both the forward and backward directions. Finally, the output of that LSTM is followed by a fully connected sigmoid layer with $88$ outputs. 
+  \end{itemize}
+
+\end{itemize}
+\end{frame}
+
+
+% \begin{frame}[t,fragile]{Discussions and Conclusions}
+% \begin{itemize}
+
+
+% \end{itemize}
+% \end{frame}
+
+
+
+\begin{frame}[t,fragile]{Dataset}
+Datasets of Tabla recordings are very limited in both size and variability. Hence we created our own dataset by taking help from the UPF's Tabla Solo Dataset. We also used the isolated tabla sounds recorded in our lab itself.  
+
+\begin{itemize}
+\item Two strategies to generate tabla recordings:
+  \begin{itemize}
+  \item Reading the annotations of the Tabla Solo Dataset and substiuting the recorded isolated strokes
+  \item Generate your own compositions with varying tempo value[70, 80, 100]
+  \item Interchanged beat sequences among the the available scores to generate new compositions(1415)
+  \end{itemize}
+\item Training RNNs over long sequences can require large amounts of memory. To expedite training, we split the training audio into smaller files. We split the audio files in 20 second splits which allowed us to achieve a batch size of 8 during training.
+\end{itemize}
+\end{frame}
+
+\begin{frame}[t,fragile]{Model Specifics}
+\begin{itemize}
+
+\item The input data representation used is same as that of the magenta's implementation.
+
+\item The fully connected sigmoid layers had 19(number of bols) units instead of 88.
+
+\item Our loss function is the sum of two cross-entropy losses: one from the onset side and one from the note side.
+
+\item The learning rate was set to $0.0006$ and was decayed with a rate of 0.98 every 10000 iterations.
+
+\item Inference is performed over the split audio files
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[t,fragile]{Results}
+\begin{figure}[h!]
+  \includegraphics[width=6cm, height=6cm]{./images/loss.png}
+  \caption{Combined Loss}
+  \label{}
+\end{figure}
+\end{frame}
+
+\begin{frame}[t,fragile]{Results}
+\begin{figure}[h!]
+  \includegraphics[width=6cm, height=6cm]{./images/f_measure.png}
+  \caption{F-Measure}
+  \label{}
+\end{figure}
+\end{frame}
+
+
+% \begin{frame}[t,fragile]{Results}
+% \begin{figure}[h!]
+%   \includegraphics[width=6cm, height=6cm]{./images/accuracy.png}
+%   \caption{Accuracy}
+%   \label{}
+% \end{figure}
+% \end{frame}
+
+
+\begin{frame}[t,fragile]{Comparison within and beyond}
+We shall compare the results of the model which has been implemeted with changes in the architecture and with the state of art system for drums. 
+\begin{itemize}
+\item Both the models indicate to the fact that multitask learning is certainly beneficial. We trained the current model without the onset detector and observed that upto 200 iterations, the f-measure was $15\%$ less (0.82-0.97).  
+\item Since in the drum transcription model, the beats and the downbeats are computed and used as labels, it renders the results prone to errors. As against here we are joinly detecting the onsets and the bols which do not come from any extra processing but from the dataeset. 
+\item When you train the model with forward only LSTMs instead of the bi-directional ones, there's only a small accuracy drop of around $8\%$ which is encouraging because forward only LSTMs can be used for online tabla transcription.
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[t,fragile]{Discussion}
+\begin{itemize}
+\item The results show that near perfect transcription has been achieved.
+\item The reason for such high accuracy is that the dataset over which the model has been trained is less complex.
+\item Also relatively, transcribing percussion instruments is easy because of the less variability in sound
+\item We can possibily achieve better results by combining an acoustic model with a language model
+\item Another direction is to go beyond traditional spectrogram representations of audio signals
+\item The inference is being carried out after splitting the audio files because the placeholders for data have been hardcoded with the variable shape. This can be undone because TensorFlow allows unspecified variable size
+\item Converting the transcriptions to drum recordings to analyse the perception quality of the transcriptions.
+\end{itemize}
+\end{frame}

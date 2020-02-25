@@ -132,27 +132,47 @@ def train():
     for j in range(hparams.num_iterations): 
       print ("Training:: iteration: ", j)
       
-      num_epochs = 3391//hparams.batch_size         # number of epochs for training 
+      num_train_files = int(3391*0.8)
+      num_test_files = 3391 - num_train_files
+      num_epochs = num_train_files//hparams.batch_size         # number of epochs for training
 
 
       for i in range(num_epochs - 1):
         print ("Training:: Epoch ", i)
         spec_list, onset_list, bols_list = data_utils.provide_batch(i)
 
-        _, loss_val, summary, labels, preds= sess.run(
-            [apply_gradient_op, loss, merged, unused_labels, unused_predictions],
+        _, loss_val, summary, pred= sess.run(
+            [apply_gradient_op, loss, merged, unused_predictions],
             feed_dict={
                 spec: spec_list, 
                 onset_labels: onset_list,
                 frame_labels: bols_list
             }
         ) 
+
+        bols_df, onset_times_df = utils.pred_to_anott(pred)
+        np.save('bols_train', bols_df)
+        np.save('onset_times_train', onset_times_df)
         
         train_writer.add_summary(summary, i)
-        
-        
+      
+      test_epochs = num_test_files//hparams.batch_size
+      for l in range(test_epochs - 1):
+        spec_list, onset_list, bols_list = data_utils.provide_batch(num_epochs + l)
 
-
+        _, loss_val, summary, metric_values, pred = sess.run(
+            [apply_gradient_op, loss, merged, metrics, unused_predictions],
+            feed_dict={
+                spec: spec_list, 
+                onset_labels: onset_list,
+                frame_labels: bols_list
+            }
+        ) 
+        # train_writer.add_summary(summary, i)
+        # train_writer.add_summary(summary, l)
+        bols_df, onset_times_df = utils.pred_to_anott(pred)
+        np.save('bols_test', bols_df)
+        np.save('onset_times_test', onset_times_df)
 
   # logging_dict = {'global_step': tf.train.get_global_step(), 'loss': loss}
 
