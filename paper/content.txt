@@ -1,0 +1,25 @@
+----Abstract---
+
+Structure: 
+
+This work attempts to advance the relatively unexplored area of transcription of tabla recordings. Tabla is a widely used North Indian percussion instrument.   
+
+
+---Introduction---
+
+//particularities of Indian Percussion instruments 
+
+In  Western  popular  music,  drums  and  percussionare  an  important  means  to  emphasize  and  shape  the  rhythm,often defining the musical style. If computers were able to analyzethe  drum  part  in  recorded  music,  it  would  enable  a  variety  ofrhythm-related  music  processing  tasks.  Especially  the  detectionand classification of drum sound events by computational meth-ods  is  considered  to  be  an  important  and  challenging  researchproblem  in  the  broader  field  of  Music  Information  Retrieval.Over   the   last   two   decades,   several   authors   have   attemptedto   tackle   this   problem   under   the   umbrella   term   AutomaticDrum Transcription (ADT). This paper presents a comprehensivereview  of  ADT  research,  including  a  thorough  discussion  ofthe task-specific challenges, categorization of existing techniques,and  evaluation  of  several  state-of-the-art  systems.  To  providemore  insights  on  the  practice  of  ADT  systems,  we  focus  ontwo families of ADT techniques, namely methods based on Non-negative  Matrix  Factorization  and  Recurrent  Neural  Networks.We  explain  the  methods’  technical  details  and  drum-specificvariations  and  evaluate  these  approaches  on  publicly  availabledatasets  with  a  consistent  experimental  setup.  Finally,  the  openissues  and  under-explored  areas  in  ADT  research  are  identifiedand discussed, providing future directions in this field.
+
+
+The tabla is a percussion instrument of the Indian subcontinent, consisting of a pair of drums, used in traditional, classical, popular and folk music. The audio of tabla is composed of many modalities. We wish to develop an end to end transcription system for tabla audio and to reconstruct the audio from the obtained transcription. We also intend to study the presence of (acoustic-prosodic) correspondences between the recitation and playing of tabla compositions like intensity and F0 variations, at the bol/stroke level (sort of like word-level in speech) and identify those that are well-correlated. In particular for music education, it would be useful to provide a rating and to identify the nature of the error in the learning process. Recently data driven signal processing approaches have been gaining momentum to solve problems like the one elaborated above. The use of machine learning to solve complex non linear problems have been dominating the speech and music research which is evident in the recently published papers. In particular, we have explored the use of NMF (Non-Negative Matrix Factorization) to solve the problem of drum transcription for drum-only-recordings. While this approach works signiﬁcantly well, having seen the developments in DNN models for Piano transcription, we are motivated to employ a similar architecture for tabla transcription. There are few challenges in implementing a neural network architecture for tabla transcription which we will elaborate over in later sections. We intend to ﬁnd a way around these challenges and come up with a suitable and robust transcription and evaluation system.
+
+
+Notes for Tabla makes no sense whatsoever given the contemporary deﬁnition of note for piano music.Hence we shall be looking into predicting relevant characteristics of percussive sound. We will use the predicted onsets to signify that the particular frame under inspection is acoustically signiﬁcant and contains cardinal information of the music piece.
+For Tabla, intuitively we can make the model predict the bols
+
+
+
+---Literature Review---
+
+Thesis:: Automatic transcription of tabla music : https://dl.acm.org/doi/book/10.5555/1144567
