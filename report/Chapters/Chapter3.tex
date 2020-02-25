@@ -1,18 +1,103 @@
-\chapter{Datasets}
+\chapter{NMF for Drum Transcription}
 
-\textbf{Tabla Solo Dataset:} \\ 
-The Tabla Solo Dataset is a transcribed collection of Tabla solo audio recordings spanning compositions from six different Gharanas of Tabla, played by Pt. Arvind Mulgaonkar. The dataset consists of audio and time aligned bol transcriptions.  \\ 
+Let $X \epsilon R(K \times T)$ be the magnitude spectrogram where $K$ = frequency bins and $T$ is the time length. We intend to decompose the mixture spectrogram X into spectral basis functions $B(:, r)$ and corresponding time-varying gains $G(r, :)$. Intuitively, speaking, the templates comprise the spectral content of the mixture’s constituent components, while the activations describe when and with which intensity they occur.NMF typically starts with a suitable initialization of matrices B and G. Subsequently, these matrices are iteratively updated to approximate X with respect to a cost function L. The detection of candidate onset events is typically approached by picking the peaks in the activation function G(r,:)
+ 
+
+\section*{Dataset}
+The dataset used was IDMT-SMT Drums. This dataset consists of 608 WAV files (44.1 kHz, Mono, 16bit). The approximate duration is 2:10 hours. Drums used are Kick Drum, Snare Drum and Hi-Hat.. There are 104 polyphonic drum set recordings (drum loops). All the 104 polyphonic drum set recordings are annotated in time and the drum being played. 
+The recordings are from three different sources:
+\begin{itemize}
+\item Real-world, acoustic drum sets (RealDrum) 
+\item Drum sample libraries (WaveDrum)
+\item Drum synthesizers (TechnoDrum)
+\end{itemize}
+
+\section*{Method} 
+
+\subsection*{Obtaining the templates}
+\begin{itemize}
+
+\item Get the list of audio and the corresponding annotation files
+\item Concatenate all the audio and the corresponding annotations in time
+\item Considering the ground truth activations as the initialization of the
+activation matrix in NMF, we estimate the basis vectors i.e the
+templates for individual drums for each audio file
+\item The templates are saved in the file-system as a numpy matrix
+\end{itemize}
+\subsection*{Predicting Activations}
+\begin{itemize}
+\item Load the saved templates
+\item Compute the spectrogram of the test audio file
+\item Considering the generated templates as the initialization of the basis
+matrix in NMF, we estimate the activations vectors i.e the activations
+for individual drums
+\item Apply peak picking on the computed activations in order to select the
+prominent bursts
+\end{itemize}
+
+\subsection*{Evaluation and Conclusions} 
+We created the templates from the drum recordings produced by drum synthesizers and we evaluated our system on the real world drum recordings i.e. drum recordings played by an actual drum-set
+\begin{itemize}
+\item We used F-measure as our evaluation metric and we use the mir\_eval library to compute the metrics
+\item The F-measure we get is 0.659 and the reported F-measure in the literature using NMF on the IDMT-SMT dataset is around 0.7
+\item In the current implementation the number of basis vectors assigned is one per drum. We can explore the possibility of assigning more than one basis vectors to a drum.
+\item Throughout the evaluation, we can observe that the Snare Drum(SD) in particular have many spurious activations of significant magnitude. Tampering with the computed template of
+SD can reduce the spurious activations like smoothening.
+\end{itemize}
 
 
 
-\textbf{Mridangam Stroke Dataset} \\ 
-The Mridangam Stroke dataset is a collection of 7162 audio examples of individual strokes of the Mridangam in various tonics. The dataset comprises of 10 different strokes played on Mridangams with 6 different tonic values.  \\ 
+\begin{figure}[h!]
+  \includegraphics[width=6cm, height=6cm]{./images/HH_temp.png}
+  \caption{HH template}
+  \label{}
+\end{figure}
 
 
-\textbf{Mridangam Tani-avarthanam dataset:}
-In Carnatic music, Tani-avarthanam is the solo performance by the percussion ensemble following the main piece of the concert.
-[No time labels] \\ 
+
+
+\begin{figure}[h!]
+  \includegraphics[width=6cm, height=6cm]{./images/KD_temp.png}
+  \caption{KD template}
+  \label{}
+\end{figure}
 
 
 
-Datasets remain to be explored extensively. 
+
+\begin{figure}[h!]
+  \includegraphics[width=6cm, height=6cm]{./images/SD_temp.png}
+  \caption{SD template}
+  \label{}
+\end{figure}
+
+
+
+
+\begin{figure}[h!]
+  \includegraphics[width=6cm, height=6cm]{./images/HH_act.png}
+  \caption{HH activation}
+  \label{}
+\end{figure}
+
+
+
+
+\begin{figure}[h!]
+  \includegraphics[width=6cm, height=6cm]{./images/KD_act.png}
+  \caption{KD activation}
+  \label{}
+\end{figure}
+
+
+
+
+\begin{figure}[h!]
+  \includegraphics[width=6cm, height=6cm]{./images/SD_act.png}
+  \caption{SD activation}
+  \label{}
+\end{figure}
+
+
+
+

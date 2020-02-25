@@ -8,13 +8,14 @@ batch_size = 8
 bols =['Da', 'Ke', 'Ge', 'Ta ','Ti', 'Na', 'Din', 'Kda', 'Tit', 'Dha', 'Dhere', 'Dhit', 'Dhi', 'Dhin', 'Re', 'Te', 'Tun', 'Tin', 'Traka']
 num_bols = len(bols)
 
-train_data_dir = '../../../data/datasets/tabla/np_dir/'
+rain_data_dir = '../data/np_dir/'
 train_spec_dir = train_data_dir + 'spec/'
 train_onset_dir = train_data_dir + 'onset/'
 train_bols_dir = train_data_dir + 'bols/'
 
-train_wav_dir = '../../../data/datasets/tabla/train_data/wav/'
-train_anott_dir = '../../../data/datasets/tabla/train_data/trans/'
+
+train_wav_dir = '../train_data/wav/'
+train_anott_dir = '../train_data/trans/'
 
 # [('activation_loss', False)
 # , ('batch_size', 8)

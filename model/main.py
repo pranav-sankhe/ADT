@@ -1,7 +1,7 @@
 import numpy as np 
 import matplotlib.pyplot as plt
 import sys 
-sys.path.insert(0, '../data')
+sys.path.insert(0, '../data/drum_dataacquisition/')
 import data_utils
 import hparams
 import utils

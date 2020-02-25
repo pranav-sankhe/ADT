@@ -1,26 +1,49 @@
-\chapter{Data Augmentation}
+\chapter{Design patterns a transcription system}
 
-Data Augmentation in the aspect of images have been considerably researched on, as againt for music. There are few papers which we will be following and will also actively ponder on other possible augmentations.  \\ 
+Basic design patterns of a transcription system are enumerated as follows:
+\begin{itemize}
+\item \textbf{Feature Representation}
+\item \textbf{Event Segmentation}
+\item \textbf{Activation Function}
+\item \textbf{Feature Transformation}
+\item \textbf{Event Classification}
+\item \textbf{Language Model}
+\end{itemize}
 
-\section{Paper 1}
-A set of augmentations can be implemented by considering the constrain preserving the labels.
-In line with recent research in speech recognition, Schluter Et al., observed that pitch shifting happens to be the most helpful augmentation method. Combined with time stretching and random frequency filtering, they achieved a reduction in classification error between $10$ and $30$, reaching the state of the art on two public datasets. 
-Here's the link to their paper in PDF format: \href{http://ofai.at/\~jan.schlueter/pubs/2015_ismir.pdf}{Click Here}. \\ 
+\section*{Feature Representation}
 
-\subsection{Data-independent Methods}
+Audio signals can be represented into feature representations that are better suited for certain processing tasks. A natural choice is  Short Time Fourier Transform(STFT). These representations are beneficial for untangling and emphasizing the important information hidden in the audio signal. These includes Band-pass filters with predefined center frequencies and bandwidths, Harmonic-Percussive Source Separation, etc.
 
-A way to increase a model’s robustness is to corrupt training examples with random noise. We consider dropout setting inputs to zero with a given probability and additive Gaussian noise with a given standard deviation. This is fully independent of the kind of data we have, and we apply it directly to the mel spectrograms fed into the network.
+\section*{Event Segmentation}
+
+Event Segmentation involves detecting the temporal location of musical events in a continuous audio stream. We compute suitable novelty functions and employ various Peak picking strategies to extract local extrema. Recently, learned features using Machine Learing techniques have shown to yield superior performance as compared to hand-crafted ones for event segmentation as often the handcrafted features are approximates. 
+
+\section*{Activation Function}
+Map feature representations into activation functions(AF) which indicated the activity level of drum instruments. Techniques which fall under the roof of activation function are NMF, Probabilistic Latent Component Analysis, Deep Neural Networks, etc.
+The defining factor of this approach is the concept AF, which generates the activity of a specific instrument over time. With the activation functions for every drum instrument, the event segmentation step can be as simple as finding local maxima of those activation functions by means of suitable peak-picking algorithms. Two families of algorithms for deriving activation functions:
+\begin{itemize}
+\item \textbf{Matrix Factorization Algorithms}
+\item \textbf{Deep Neural Networks}
+\end{itemize}
+
+\subsection*{Matrix Factorization Algorithms}
+
+This approach uses magnitude spectrograms and applies matrix factorization algorithms in order to decompose the spectrogram into basis functions and their corresponding activation functions. Early systems used methods such as Independent Subspace Analysis, Prior Subspace Analysis and Non-Negative Independent Component Analysis. The basic assumption of these algorithms is that the target signal is a superposition of multiple, statistically independent sources. This assumption is problematic since the activations of the different drum instruments are usually rhythmically related. When the signal contains both drums and melodic instruments, this assumption may be more severely violated. Recently, more and more systems opted for NMF, which has less strict statistical assumptions about the sources. In NMF, the only constraint is the non-negativity of the sources, which is naturally given in magnitude spectograms. NMF-based ADT systems include basic NMF as well as related concepts such as Non-negative Vector Decomposition, Non-Negative Matrix Deconvolution, Semi-Adaptive NMF, Partially-Fixed NMF, and Probabilistic Latent Component Analysis (PLCA). Most of these factorization-based methods require a set of predefined basis functions as prior knowledge; when this predefined set does not match well with the components in the target signal, the resulting performance may decrease significantly.
 
 
-\subsection{Audio-specific Methods}
-Pitch shifting and time stretching the audio data by moderate amounts does not change the label for a lot of MIR tasks. We implemented this by scaling linear-frequency spectrogram excerpts vertically (for pitch shifting) or horizontally (for time stretching).  \\ 
 
-A much simpler idea focuses on invariance to loudness: We scale linear spectrograms by a random factor in a given decibel range, or, equivalently, add a random offset to log- magnitude mel spectrograms.  \\ 
-
-As a fourth method, we apply random frequency filters to the linear spectrogram. Specifically, we create a filter re- sponse as a Gaussian function.
-
+\subsection*{Deep Neural Networks}
+DNNs are a machine learning architecture that allow to learn non-linear mappings of arbitrary inputs to target outputs based on training data. They are usually constructed as a cascade of layers consisting of learnable, linear weights and simple non-linear functions. The learning of the weight parameters is performed by variants of gradient descent. \\ 
+RNNs can in principle also perform sequence modeling, similar to the more classic methods such as HMM. However, the lack of large amounts of training data and the applied training methods, prohibit RNN to perform well. Some of the factorization-based approaches can also be used to reconstruct the magnitude spectrogram of drum sources and serve as source separators. This type of approach takes care of simultaneous events without the need of introducing combined classes during training. However, when the multiple sources overlap in the spectral domain, cross-talk between activation functions will appear and degrade the performance. Furthermore, the use of
+magnitude spectrograms neglects the phase, which could potentially strip away critical information. 
 
 
-\section{Paper 2}
- 
-McFee Et al. have implemeted a software framework in \texttt{Python} for data augmentation for music which remains to be explored in depth but we believe it will provide valuable tools to carry out augmentation efficiently. Here's their paper regarding the same in PDF format: \href{https://bmcfee.github.io/papers/ismir2015_augmentation.pdf}{Click Here}
+\subsection*{Feature Transformation}
+This design pattern provides a transformation of the feature representation to a more compact form. This goal can be achieved by different techniques such as feature selection, Principal Component Analysis (PCA), or Linear Discriminant Analysis (LDA).
+
+\subsection*{Event Classification}
+This processing step aims at associating the instrument type (e.g., KD, SD, or HH) with the corresponding musical event. In the majority of papers, this is achieved through machine learning methods that can learn to discriminate the target drum instruments based on training examples. Inexpensive alternatives include clustering and cross-correlation.
+
+
+\subsection*{Language Model}
+This pattern takes the sequential relationship between musical events into account. Usually this is achieved using a probabilistic model capable of learning the musical grammar and inferring the structure of musical events. LMs are based on classical methods such as Hidden Markov Models (HMM) or more recent methods such as RNNs.

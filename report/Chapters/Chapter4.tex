@@ -1,2 +1,89 @@
-\chapter{Literature Review}
+\chapter{State of Art Drum Transcription Model}
+
+Richard Vogl Et. al in their paper, Drum Transcription via Joint Beat And Drum Modeling Using Convolution Reccurent Neural Networks have presented the state of art drum transcription system. They use metadata like meters and tempo as they think it helps to transcribe better. The authors claim that the system has the means to utilize information on the rhythmical structure of a song. They evaluate three different architecture designs in particular viz. recurrent, convolutional, and recurrent-convolutional neural networks and they show that learning beats jointly with drums can be beneficial for the task of drum detection. CRNNs should result in a model, in which the convolutional layers focus on acoustic modeling of the events, while the recurrent layers learn temporal structures of the features. 
+
+
+\section*{About the Metadata}
+\begin{itemize}
+\item Additional information required by a musician to perform a piece
+\item This information comprises meter, over- all tempo, indicators for bar boundaries, indications for local changes in tempo, dynamics, and playing style of the piece. 
+\item To obtain some of this information, beat and down-beat detection methods can be utilized. 
+\item Beats provide tempo information
+\item downbeats add bar boundaries
+\item combination of both provides indication for the meter within the bars
+\end{itemize}
+
+\section*{Feature Extraction}
+  
+\begin{itemize}
+\item They use log magnitude spectrogram as an input
+\item Window size = 46 milliseconds (2048 samples)
+\item The frequency bins mel scaled
+\item The positive first order differential over time of this spectrogram is calculated and concatenated.
+\end{itemize}  
+
+\section*{Neural Network Models}
+
+
+\subsection*{Convolutional Neural Network}
+\begin{itemize}
+\item While plain CNNs do not feature any memory, the spectral context allows the CNN to access surround- ing information during training and classification. 
+\item How- ever, a context of 25 frames (250ms) is not enough to find repetitive structures in the rhythm patterns. 
+\item Therefore, the CNN can only rely on acoustic, i.e., spectral features of the signal. 
+\item with advanced training methods like batch normalization, as well as the advantage that CNNs can easily learn pitch invariant kernels, CNNs are well- equipped to learn a task adequate acoustic model. 
+\end{itemize}
+
+\subsection*{Convolutional Bidirectional RNN}
+\begin{itemize}
+\item Convolutional recurrent neural networks (CRNN) repre- sent a combination of CNNs and RNNs. 
+\item In this work, the convolutional layers directly process the input features 
+\item The recurrent layers are placed after the convolutional layers and are supposed to serve as a means for the network to learn structural patterns 
+\end{itemize}
+
+\subsection*{Drum Detection with Oracle Beat Features}
+\begin{itemize}
+\item In addition to the input features, the annotated beats, represented as the target functions for beats and downbeats, are included as input features. 
+\item Using the results of these experiments, it can be investigated if the prior knowledge of beat and downbeat positions is beneficial for drum detection. 
+\end{itemize}
+
+\subsection*{Joint Drum and Beat Detection}
+\begin{itemize}
+\item As input for training, again, only the spectrogram features are used. 
+\item Targets for training of the NNs comprise, in this case, drum and beat activation functions.
+\item Beats and drums are closely related, because usually drum pat- tern are repetitive on a bar-level (separated by downbeats) and drum onsets often correlate with beats. 
+\end{itemize}
+
+
+
+
+
+
+\section*{Commonalities between NN architectures considered}
+\begin{itemize}
+\item All NNs are trained using the same input features
+\item The RNN architectures are implemented as bidirectional RNNs (BRNN) 
+\item the output layers consist of three or five sigmoid units, representing three drum instruments under observation (drum only) or three drum instruments plus beat and downbeat (drum and beats) 
+\item the NNs are all trained using the RMSprop optimization algorithm 
+\end{itemize}  
+
+
+\section*{Joint Detection} 
+\begin{itemize}
+\item In this work, neural networks for joint beat and drum detection are trained in a multi-task learning fashion. 
+\item It is possible to extract drums and beats separately using existing work and combine the results afterwards
+\item They show that it is beneficial to train for both tasks together, allowing a joint model to leverage commonalities of the two problems 
+\end{itemize}  
+
+
+\section*{Discussion} 
+\begin{itemize}
+\item CNN with a large enough spectral context (25 frames in this work) can detect drum events better than RNNs.
+\item The results for CNNs and CRNNs show that convolutional feature processing is beneficial for drum detection.
+\item The findings considering drum detection results for multi-task learning are also promising
+\item The low results of beat and downbeat tracking are a limiting factor
+\item As a next step, to better leverage multi-task learning effects, beat detection results must be improved
+\item Trained RNNs seem to learn only an acoustic, but not a structural model for drum transcription. (Due to the less number of time-steps used)
+\item The difference between the magenta model and the model considered in this paper is that there’s no concatenation of the predicted beats and downbeats. 
+\end{itemize}  
+
 

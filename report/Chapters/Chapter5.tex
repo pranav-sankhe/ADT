@@ -1,14 +1,111 @@
-\chapter{Architecture}
+\chapter{Implemented Model}
 
-Here's a brief overview of the ideas of interest derieved from the Magenta's Transcription system for piano recordings. Acute details remian to be added and we plan to do that anon. 
-
-\textbf{Model} \\ 
-In all the previous attempts at ADT, all the frames are considered independent (except RNN) and are given equal importance which is not the case. The frame which contains the onset is more important than the other frames and this inspired to add an onset detector to the system \\ 
+The model is based on the premise that the frames containing an onset are more important than those who don’t in terms of perception and hence transcription. This idea is manifested by training a dedicated note onset detector and using the raw output of that detector as additional input for the framewise note activation detector. The input data representation used is mel-scaled spectrograms with log amplitude of the input raw audio with 229 logarithmically-spaced frequency bins, a hop length of 512, an FFT window of 2048, and a sample rate of 16kHz.
 
 
-\textbf{Data Representation} \\ 
-The input data is the mel spectrogram of the raw audio signal. This raw audio signal consists of all the drums (as well as other instruments) playing together. I wish to explore the possibility of employing BSS methods on audio signal to identify the individual drum sources. 
-After separating the individual drum sources, we can construct a n-channel input for our model. 
-The motivation to separate sources is the huge decrease in accuracy upon introduction of other instruments. \\ 
-\chapter{Future Work}
+\section*{Model Description}
+The onset detector is composed of the acoustic model, followed by a bidirectional LSTM with 128 units in both the forward and backward directions, followed by a fully connected sigmoid layer with 88 outputs for representing the probability of an onset for each of the 88 piano keys.The frame activation detector is composed of a separate acoustic model, followed by a fully connected sigmoid layer with 88 outputs. Its output is concatenated together with the output of the onset detector and followed by a bidirectional LSTM with 128 units in both the forward and backward directions. Finally, the output of that LSTM is followed by a fully connected sigmoid layer with 88 outputs.
+ 
+\begin{figure}[h!]
+  \includegraphics[width=6cm, height=8cm]{./images/piano_model.png}
+  \caption{Model Architecture}
+  \label{}
+\end{figure}
 
+\texttt{Image source: https://arxiv.org/pdf/1710.11153.pdf}
+
+
+\section*{Dataset}
+Datasets of Tabla recordings are very limited in both size and variability. Hence we created our own dataset by taking help from the UPF’s Tabla Solo Dataset. We also used the isolated tabla sounds recorded in our lab itself. \\ 
+Strategies to generate tabla recordings:
+\begin{itemize}
+\item Reading the annotations of the Tabla Solo Dataset and substiuting
+the recorded isolated strokes
+\item Generate your own compositions with varying tempo value[70, 80, 100]
+\item Interchanged beat sequences among the the available scores to
+generate new compositions(1415)
+\end{itemize}
+
+Training RNNs over long sequences can require large amounts of memory. To expedite training, we split the training audio into smaller files. We split the audio files in 20 second splits which
+allowed us to achieve a batch size of 8 during training.
+
+
+
+\section*{Model Specifics}
+\begin{itemize}
+\item The input data representation used is same as that of the magenta’s implementation.
+\item The fully connected sigmoid layers had $19$(number of bols).
+\item Our loss function is the sum of two cross-entropy losses: one from the onset side and one from the note side.
+\item The learning rate was set to $0.0006$ and was decayed with a rate of $0.98$ every $10000$ iterations.
+\end{itemize}
+
+\section*{Results}
+
+\begin{figure}[h!]
+  \includegraphics[width=6cm, height=6cm]{./images/loss.png}
+  \caption{Loss}
+  \label{}
+\end{figure}
+
+\begin{figure}[h!]
+  \includegraphics[width=6cm, height=6cm]{./images/accuracy.png}
+  \caption{Accuracy}
+  \label{}
+\end{figure}
+
+
+\begin{figure}[h!]
+  \includegraphics[width=6cm, height=6cm]{./images/f_measure.png}
+  \caption{F-Measure}
+  \label{}
+\end{figure}
+
+
+\begin{figure}[h!]
+  \includegraphics[width=6cm, height=6cm]{./images/precision.png}
+  \caption{precision}
+  \label{}
+\end{figure}
+
+
+
+\begin{figure}[h!]
+  \includegraphics[width=6cm, height=6cm]{./images/recall.png}
+  \caption{recall}
+  \label{}
+\end{figure}
+
+\begin{figure}[h!]
+  \includegraphics[width=6cm, height=6cm]{./images/false_negatives.png}
+  \caption{False Negatives}
+  \label{}
+\end{figure}
+
+\begin{figure}[h!]
+  \includegraphics[width=6cm, height=6cm]{./images/false_positives.png}
+  \caption{False Positives}
+  \label{}
+\end{figure}
+
+\begin{figure}[h!]
+  \includegraphics[width=6cm, height=6cm]{./images/true_positives.png}
+  \caption{True Positives}
+  \label{}
+\end{figure}
+ 
+
+\section*{Discussion}
+We shall compare the results of the model which has been implemeted with changes in the architecture and with the state of art system for drums.
+\begin{itemize}
+\item Both the models indicate to the fact that multitask learning is certainly beneficial. We trained the current model without the onset detector and observed that upto 200 iterations, the f-measure was $15\%$ less $(0.82-0.97)$.
+\item Since in the drum transcription model, the beats and the downbeats are computed and used as labels, it renders the results prone to errors. As against here we are joinly detecting the onsets and the bols which do not come from any extra processing but from the dataeset.
+\item When you train the model with forward only LSTMs instead of the bi-directional ones, there’s only a small accuracy drop of around
+  $8\%$ which is encouraging because forward only LSTMs can be used
+\item The results show that near perfect transcription has been achieved.
+\item The reason for such high accuracy is that the dataset over which the model has been trained is less complex.
+\item Also relatively, transcribing percussion instruments is easy because of the less variability in sound
+\item We can possibily achieve better results by combining an acoustic model with a language model
+\item Another direction is to go beyond traditional spectrogram representations of audio signals
+\item The inference is being carried out after splitting the audio files because the placeholders for data have been hardcoded with the variable shape. This can be undone because TensorFlow allows unspecified variable size
+\item Converting the transcriptions to drum recordings to analyse the perception quality of the transcriptions.
+\end{itemize}  

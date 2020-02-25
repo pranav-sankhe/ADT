@@ -11,6 +11,22 @@ import tensorflow as tf
 import tensorflow.contrib.slim as slim
 import hparams
 
+
+def pred_to_anott(pred):
+  time_len = hparams.sample_rate*20
+  num_bols = pred.shape[1]
+
+  bols_df = []
+  onset_times_df = []
+  for t_index in range(pred.shape[0]):
+    for i in range(num_bols):
+      if pred[t_index][i] == 1:
+        bols_df.append(hparams.bols[i])
+        onset_times_df.append(t_index*hparams.hop_length)
+
+  return bols_df, onset_times_df      
+
+
 def log_loss(labels, predictions, epsilon=1e-7, scope=None, weights=None):
   """Calculate log losses.
 
